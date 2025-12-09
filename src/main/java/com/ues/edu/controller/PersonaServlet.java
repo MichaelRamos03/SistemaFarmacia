@@ -190,58 +190,85 @@ public class PersonaServlet extends HttpServlet {
             }
             break;
 
-            case "consultar": {
-
-                PersonaJpaControler personaJpaControl = new PersonaJpaControler(); //emf
-                String html = "<table class=\"table\" id=\"tabla_persona\""
-                        + "class=\"table table-bordered dt-responsive nowrap\" width=\"100%\">\n"
-                        + "  <thead>\n"
+case "consultar": {
+                PersonaJpaControler personaJpaControl = new PersonaJpaControler();
+                
+                // Encabezados tabla moderna
+                String html = "<table id=\"tabla_persona\" class=\"table table-hover table-bordered nowrap\" style=\"width:100%\">\n"
+                        + "  <thead class=\"bg-light\">\n"
                         + "    <tr>\n"
                         + "      <th scope=\"col\">#</th>\n"
-                        + "      <th scope=\"col\">Usuario:</th>\n"
-                        + "      <th scope=\"col\">Nombre:</th>\n"
-                        + "      <th scope=\"col\">Edad:</th>\n"
-                        + "      <th scope=\"col\">Dui:</th>\n"
-                        + "      <th scope=\"col\">Telefono:</th>\n"
-                        + "      <th scope=\"col\">Acciones:</th>\n"
+                        + "      <th scope=\"col\">Usuario</th>\n"
+                        + "      <th scope=\"col\">Nombre</th>\n"
+                        + "      <th scope=\"col\">Edad</th>\n"
+                        + "      <th scope=\"col\">DUI</th>\n"
+                        + "      <th scope=\"col\">Teléfono</th>\n"
+                        + "      <th scope=\"col\" class=\"text-center\">Acciones</th>\n"
                         + "    </tr>\n"
                         + "  </thead>\n"
                         + "  <tbody>";
-                this.personaList = new ArrayList<>();
-                this.personaList = personaJpaControl.findPersonaEntities();
+
+                try {
+                    this.personaList = personaJpaControl.findPersonaEntities();
+                } catch (Exception e) {
+                    this.personaList = new ArrayList<>();
+                }
+
                 int cont = 0;
                 int i = 1;
 
-                for (Persona objPersona : this.personaList) {
-                    cont++;
-                    html += "  <tr>\n"
-                            + "      <td>" + i + "</td>\n"
-                            + "      <td>" + objPersona.getUsuario().getUsuario() + "</td>\n"
-                            + "      <td>" + objPersona.getNombrePersona() + "</td>\n"
-                            + "      <td>" + objPersona.getEdad() + "</td>\n"
-                            + "      <td>" + objPersona.getDui() + "</td>\n"
-                            + "      <td>" + objPersona.getTelefono() + "</td>\n"
-                            + "<td>"
-                            + "<div class='dropdown m-b-10'>"
-                            + "<button class='btn btn-secondary dropdown-toggle'"
-                            + " type='button' id='dropdownMenuButton' data-toggle='dropdown'  aria-haspopup='true'"
-                            + "aria-expanded='false'> Seleccione</button>"
-                            + "<div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>"
-                            + "<a class='dropdown-item btn_eliminar' data-id='" + objPersona.getId() + "' href='javascript:void(0) '>Eliminar</a>"
-                            + "<a class='dropdown-item btn_editar' data-id='" + objPersona.getId() + "' href='javascript:void(0) '>Actualizar</a>"
-                            + "</div>"
-                            + "</div>"
-                            + "</td>"
-                            + " </tr>";
-                    i++;
+                if (this.personaList != null && !this.personaList.isEmpty()) {
+                    for (Persona objPersona : this.personaList) {
+                        cont++;
+
+                        // --- VALIDACIONES DE SEGURIDAD (Evita pantalla blanca) ---
+                        String nombre = (objPersona.getNombrePersona() != null) ? objPersona.getNombrePersona() : "Sin nombre";
+                        String usuario = "---";
+                        
+                        // Verificamos que el objeto usuario y su nombre existan
+                        if (objPersona.getUsuario() != null && objPersona.getUsuario().getUsuario() != null) {
+                            usuario = objPersona.getUsuario().getUsuario();
+                        }
+
+                        String inicial = (nombre.length() > 0) ? nombre.substring(0, 1).toUpperCase() : "?";
+                        // ---------------------------------------------------------
+
+                        html += "  <tr>\n"
+                                + "      <td class='align-middle fw-bold'>" + i + "</td>\n"
+                                + "      <td class='align-middle'><span class='badge bg-light text-dark border'>" + usuario + "</span></td>\n"
+                                + "      <td class='align-middle'>" 
+                                + "         <div class='d-flex align-items-center'>"
+                                + "            <div class='rounded-circle bg-purple-light text-purple d-flex justify-content-center align-items-center me-2' style='width:35px; height:35px; font-weight:bold;'>"
+                                +                 inicial
+                                + "            </div>"
+                                + "            <div>" + nombre + "</div>"
+                                + "         </div>"
+                                + "      </td>\n"
+                                + "      <td class='align-middle'>" + objPersona.getEdad() + " Años</td>\n"
+                                + "      <td class='align-middle'>" + (objPersona.getDui() != null ? objPersona.getDui() : "") + "</td>\n"
+                                + "      <td class='align-middle'>" + (objPersona.getTelefono() != null ? objPersona.getTelefono() : "") + "</td>\n"
+                                + "      <td class='align-middle text-center'>\n"
+                                + "        <div class='d-flex justify-content-center gap-2'>\n"
+                                + "          <button class='btn btn-sm btn-outline-purple btn_editar' data-id='" + objPersona.getId() + "' title='Editar'>\n"
+                                + "            <i class='bi bi-pencil-fill'></i>\n"
+                                + "          </button>\n"
+                                + "          <button class='btn btn-sm btn-outline-danger btn_eliminar' data-id='" + objPersona.getId() + "' title='Eliminar'>\n"
+                                + "            <i class='bi bi-trash-fill'></i>\n"
+                                + "          </button>\n"
+                                + "        </div>\n"
+                                + "      </td>\n"
+                                + "  </tr>";
+                        i++;
+                    }
                 }
-                html += "  </tbody>\n"
-                        + "</table>";
+
+                html += "  </tbody>\n" + "</table>";
+
                 this.json.put("resultado", "exito");
                 this.json.put("tabla", html);
                 this.json.put("cantidad", cont);
                 this.array.put(this.json);
-                response.getWriter().write(array.toString());
+                response.getWriter().write(this.array.toString());
             }
             break;
 

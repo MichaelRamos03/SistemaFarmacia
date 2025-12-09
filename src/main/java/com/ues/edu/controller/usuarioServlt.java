@@ -201,56 +201,87 @@ public class usuarioServlt extends HttpServlet {
             break;
 
             case "consultar": {
-                UsuarioJpaControler usuarioJpaControl = new UsuarioJpaControler(); //emf
-                String html = "<table class=\"table\" id=\"tabla_usuarios\""
-                        + "class=\"table table-bordered dt-responsive nowrap\" width=\"100%\">\n"
-                        + "  <thead>\n"
+                UsuarioJpaControler usuarioJpaControl = new UsuarioJpaControler(); // emf
+
+                // Encabezados de la tabla (Diseño limpio)
+                String html = "<table id=\"tabla_usuarios\" class=\"table table-hover table-bordered nowrap\" style=\"width:100%\">\n"
+                        + "  <thead class=\"bg-light\">\n"
                         + "    <tr>\n"
                         + "      <th scope=\"col\">#</th>\n"
-                        + "      <th scope=\"col\">Nombre Usuario</th>\n"
-                        + "      <th scope=\"col\">Contraseña</th>\n"
+                        + "      <th scope=\"col\">Usuario</th>\n"
                         + "      <th scope=\"col\">Rol</th>\n"
-                        + "      <th scope=\"col\">estado</th>\n"
-                        + "      <th scope=\"col\">Acciones</th>\n"
+                        + "      <th scope=\"col\" class=\"text-center\">Estado</th>\n"
+                        + "      <th scope=\"col\" class=\"text-center\">Acciones</th>\n"
                         + "    </tr>\n"
                         + "  </thead>\n"
                         + "  <tbody>";
+
                 this.usuariosList = new ArrayList<>();
                 this.usuariosList = usuarioJpaControl.findUsuarioActivas();
-                int cont = 0;
                 int i = 1;
 
                 for (Usuario objUsuario : this.usuariosList) {
-                    cont++;
+
+                    // Badge de Estado (Pastilla Verde o Roja)
+                    String estadoBadge = objUsuario.isEstado()
+                            ? "<span class='badge bg-success bg-opacity-10 text-success px-3 rounded-pill'>Activo</span>"
+                            : "<span class='badge bg-danger bg-opacity-10 text-danger px-3 rounded-pill'>Inactivo</span>";
+
+                    // Inicial del nombre para el círculo de color
+                    String inicial = (objUsuario.getUsuario() != null && !objUsuario.getUsuario().isEmpty())
+                            ? objUsuario.getUsuario().substring(0, 1).toUpperCase()
+                            : "?";
+
                     html += "  <tr>\n"
-                            + "      <td>" + i + "</td>\n"
-                            + "      <td>" + objUsuario.getUsuario() + "</td>\n"
-                            + "      <td>" + objUsuario.getContrasenia() + "</td>\n"
-                            + "      <td>" + objUsuario.getRol().getNombreRol() + "</td>\n"
-                            + "      <td>" + (objUsuario.isEstado() ? "Activo" : "Inactivo") + "</td>\n"
-                            + "<td>"
-                            + "<div class='dropdown m-b-10'>"
-                            + "<button class='btn btn-secondary dropdown-toggle'"
-                            + " type='button' id='dropdownMenuButton' data-toggle='dropdown'  aria-haspopup='true'"
-                            + "aria-expanded='false'> Seleccione</button>"
-                            + "<div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>"
-                            + ( objUsuario.isEstado()
-                             ? "<a class='dropdown-item btn_eliminar' data-id='" + objUsuario.getId() + "' href='javascript:void(0)'>Eliminar</a>"
-                            : "<a class='dropdown-item btn_activar' data-id='" +objUsuario.getId() + "' href='javascript:void(0)'>Activar</a>")
-                            + "<a class='dropdown-item btn_editar' data-id='" + objUsuario.getId() + "' href='javascript:void(0)'>Actualizar</a>"
-                            + "</div>"
-                            + "</div>"
-                            + "</td>"
-                            + " </tr>";
+                            + "      <td class='align-middle fw-bold'>" + i + "</td>\n"
+                            + "      <td class='align-middle'>"
+                            + "         <div class='d-flex align-items-center'>"
+                            + "            <div class='rounded-circle bg-purple-light text-purple d-flex justify-content-center align-items-center me-2' style='width:35px; height:35px; font-weight:bold;'>"
+                            + inicial
+                            + "            </div>"
+                            + "            <div>" + objUsuario.getUsuario() + "</div>"
+                            + "         </div>"
+                            + "      </td>\n"
+                            + "      <td class='align-middle'>" + objUsuario.getRol().getNombreRol() + "</td>\n"
+                            + "      <td class='align-middle text-center'>" + estadoBadge + "</td>\n"
+                            + "      <td class='align-middle text-center'>\n";
+
+                    // --- INICIO: BOTONES DE ACCIÓN DIRECTA ---
+                    html += "        <div class='d-flex justify-content-center gap-2'>\n";
+
+                    // 1. Botón EDITAR (Morado)
+                    html += "          <button class='btn btn-sm btn-outline-purple btn_editar' data-id='" + objUsuario.getId() + "' title='Editar usuario'>\n"
+                            + "            <i class='bi bi-pencil-fill'></i>\n"
+                            + "          </button>\n";
+
+                    // 2. Botón ELIMINAR / REACTIVAR
+                    if (objUsuario.isEstado()) {
+                        // Si está activo -> Botón Rojo (Basurero)
+                        html += "          <button class='btn btn-sm btn-outline-danger btn_eliminar' data-id='" + objUsuario.getId() + "' title='Desactivar usuario'>\n"
+                                + "            <i class='bi bi-trash-fill'></i>\n"
+                                + "          </button>\n";
+                    } else {
+                        // Si está inactivo -> Botón Verde (Flecha Reactivar)
+                        html += "          <button class='btn btn-sm btn-outline-success btn_activar' data-id='" + objUsuario.getId() + "' title='Reactivar usuario'>\n"
+                                + "            <i class='bi bi-arrow-counterclockwise'></i>\n"
+                                + "          </button>\n";
+                    }
+
+                    html += "        </div>\n";
+                    // --- FIN BOTONES ---
+
+                    html += "      </td>\n"
+                            + "  </tr>";
                     i++;
                 }
-                html += "  </tbody>\n"
-                        + "</table>";
+
+                html += "  </tbody>\n" + "</table>";
+
                 this.json.put("resultado", "exito");
                 this.json.put("tabla", html);
-                this.json.put("cantidad", cont);
+                this.json.put("cantidad", this.usuariosList.size()); // Actualiza el contador de cards
                 this.array.put(this.json);
-                response.getWriter().write(array.toString());
+                response.getWriter().write(this.array.toString());
             }
             break;
 
@@ -300,8 +331,8 @@ public class usuarioServlt extends HttpServlet {
             this.array.put(this.json);
             response.getWriter().write(this.array.toString());
             break;
-            
-             case "listar_inactivas": {
+
+            case "listar_inactivas": {
                 UsuarioJpaControler UsuarioModel = new UsuarioJpaControler();
                 List<Usuario> lista = UsuarioModel.findUsuarioInactivas();
 
@@ -331,7 +362,6 @@ public class usuarioServlt extends HttpServlet {
                 break;
             }
 
-            
         }
     }
 

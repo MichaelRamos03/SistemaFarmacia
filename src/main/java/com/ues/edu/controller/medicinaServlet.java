@@ -96,10 +96,9 @@ public class medicinaServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-                SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
-                //fomrato desde html
-                SimpleDateFormat formatoFe = new SimpleDateFormat("yyyy-MM-dd");
-
+        SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
+        //fomrato desde html
+        SimpleDateFormat formatoFe = new SimpleDateFormat("yyyy-MM-dd");
 
         request.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
@@ -141,7 +140,7 @@ public class medicinaServlet extends HttpServlet {
                     int idCategoria = Integer.parseInt(request.getParameter("idCategoria"));
                     String estadoStr = request.getParameter("activo");
                     boolean activo = "activo".equalsIgnoreCase(estadoStr);
-                   
+
                     this.categoria = new Categoria(idCategoria);
 
                     Medicamento objMedicamento = new Medicamento(nombre, cantidadExistencias, precioUnidad, precioTotal, fechaIngreso, fechaDeExpiracion, descripcion, activo, this.categoria);
@@ -197,67 +196,130 @@ public class medicinaServlet extends HttpServlet {
             }
             break;
 
+            // ... (Tus imports existentes) ...
+// DENTRO DEL MÉTODO doPost Y EL SWITCH:
             case "consultar": {
-                MedicinaJpaControler medicinaJpaControl = new MedicinaJpaControler(); //emf
-                String html = "<table class=\"table\" id=\"tabla_medicamentos\""
-                        + "class=\"table table-bordered dt-responsive nowrap\" width=\"100%\">\n"
-                        + "  <thead>\n"
+                MedicinaJpaControler medicinaJpaControl = new MedicinaJpaControler();
+
+                // Formato fecha local (para evitar duplicados)
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
+                String html = "<table id=\"tabla_medicamentos\" class=\"table table-hover table-bordered nowrap\" style=\"width:100%\">\n"
+                        + "  <thead class=\"bg-light\">\n"
                         + "    <tr>\n"
                         + "      <th scope=\"col\">#</th>\n"
-                        + "      <th scope=\"col\">Nombre Medicamento</th>\n"
-                        + "      <th scope=\"col\">Cantidad Existente</th>\n"
-                        + "      <th scope=\"col\">precio unidad</th>\n"
-                        + "      <th scope=\"col\">precio total</th>\n"
-                        + "      <th scope=\"col\">fecha Ingreso</th>\n"
-                        + "      <th scope=\"col\">fecha Expiracion</th>\n"
-                        + "      <th scope=\"col\">descripcion</th>\n"
-                        + "      <th scope=\"col\">estado</th>\n"
-                        + "      <th scope=\"col\">Acciones</th>\n"
+                        + "      <th scope=\"col\">Nombre</th>\n"
+                        + "      <th scope=\"col\">Categoría</th>\n"
+                        + "      <th scope=\"col\">Stock</th>\n"
+                        + "      <th scope=\"col\">Precio U.</th>\n"
+                        + "      <th scope=\"col\">Total</th>\n"
+                        + "      <th scope=\"col\">Vence</th>\n"
+                        + "      <th scope=\"col\" class=\"text-center\">Estado</th>\n"
+                        + "      <th scope=\"col\" class=\"text-center\">Acciones</th>\n"
                         + "    </tr>\n"
                         + "  </thead>\n"
                         + "  <tbody>";
-                this.medicinaList = new ArrayList<>();
-                this.medicinaList = medicinaJpaControl.findMedicamentoEntities();
+
+                try {
+                    this.medicinaList = medicinaJpaControl.findMedicamentoEntities();
+                } catch (Exception e) {
+                    this.medicinaList = new ArrayList<>();
+                }
+
                 int cont = 0;
                 int i = 1;
 
-                for (Medicamento objMedicamento : this.medicinaList) {
-                    cont++;
-                    html += "  <tr>\n"
-                            + "      <td>" + i + "</td>\n"
-                            + "      <td>" + objMedicamento.getNombre() + "</td>\n"
-                            + "      <td>" + objMedicamento.getCantidadExistencias() + "</td>\n"
-                            + "      <td>" + objMedicamento.getPrecioUnidad() + "</td>\n"
-                            + "      <td>" + objMedicamento.getPrecioTotal() + "</td>\n"
-                            + "      <td>" + formatoFecha.format(objMedicamento.getFechaIngreso()) + "</td>\n"
-                            + "      <td>" + formatoFecha.format(objMedicamento.getFechaDeExpiracion()) + "</td>\n"
-                            + "      <td>" + objMedicamento.getDescripcion() + "</td>\n"
-                            + "      <td>" + (objMedicamento.isActivo() ? "Activo" : "Inactivo") + "</td>\n"
-                            + "<td>"
-                            + "<div class='dropdown m-b-10'>"
-                            + "<button class='btn btn-secondary dropdown-toggle'"
-                            + " type='button' id='dropdownMenuButton' data-toggle='dropdown'  aria-haspopup='true'"
-                            + "aria-expanded='false'> Seleccione</button>"
-                            + "<div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>"
-                            + (objMedicamento.isActivo()
-                            ? "<a class='dropdown-item btn_eliminar' data-id='" + objMedicamento.getIdMedicamento() + "' href='javascript:void(0)'>Eliminar</a>"
-                            : "<a class='dropdown-item btn_activar' data-id='" + objMedicamento.getIdMedicamento() + "' href='javascript:void(0)'>Activar</a>")
-                            + "<a class='dropdown-item btn_editar' data-id='" + objMedicamento.getIdMedicamento() + "' href='javascript:void(0)'>Actualizar</a>"
-                            + "</div>"
-                            + "</div>"
-                            + "</td>"
-                            + " </tr>";
-                    i++;
+                if (this.medicinaList != null) {
+                    for (Medicamento obj : this.medicinaList) {
+                        // Solo mostramos activos en la tabla principal si queremos separar papelera
+                        // Pero si tu lógica trae todos, filtramos visualmente o mostramos todos
+                        // Asumiré que quieres ver los activos aquí
+                        if (obj.isActivo()) {
+                            cont++;
+                            String nombre = (obj.getNombre() != null) ? obj.getNombre() : "Sin nombre";
+                            String catName = (obj.getCategoria() != null) ? obj.getCategoria().getNombreCategoria() : "-";
+                            String fechaVence = (obj.getFechaDeExpiracion() != null) ? sdf.format(obj.getFechaDeExpiracion()) : "-";
+
+                            html += "  <tr>\n"
+                                    + "      <td class='align-middle fw-bold'>" + i + "</td>\n"
+                                    + "      <td class='align-middle'>" + nombre + "</td>\n"
+                                    + "      <td class='align-middle'><span class='badge bg-light text-dark border'>" + catName + "</span></td>\n"
+                                    + "      <td class='align-middle fw-bold'>" + obj.getCantidadExistencias() + "</td>\n"
+                                    + "      <td class='align-middle'>$" + obj.getPrecioUnidad() + "</td>\n"
+                                    + "      <td class='align-middle text-primary'>$" + obj.getPrecioTotal() + "</td>\n"
+                                    + "      <td class='align-middle'>" + fechaVence + "</td>\n"
+                                    + "      <td class='align-middle text-center'><span class='badge bg-success bg-opacity-10 text-success px-3 border border-success'>Activo</span></td>\n"
+                                    + "      <td class='align-middle text-center'>\n"
+                                    + "        <div class='d-flex justify-content-center gap-2'>\n"
+                                    + "          <button class='btn btn-sm btn-outline-purple btn_editar' data-id='" + obj.getIdMedicamento() + "' title='Editar'>\n"
+                                    + "            <i class='bi bi-pencil-fill'></i>\n"
+                                    + "          </button>\n"
+                                    + "          <button class='btn btn-sm btn-outline-danger btn_eliminar' data-id='" + obj.getIdMedicamento() + "' title='Eliminar'>\n"
+                                    + "            <i class='bi bi-trash-fill'></i>\n"
+                                    + "          </button>\n"
+                                    + "        </div>\n"
+                                    + "      </td>\n"
+                                    + "  </tr>";
+                            i++;
+                        }
+                    }
                 }
-                html += "  </tbody>\n"
-                        + "</table>";
+
+                html += "  </tbody>\n" + "</table>";
+
                 this.json.put("resultado", "exito");
                 this.json.put("tabla", html);
                 this.json.put("cantidad", cont);
                 this.array.put(this.json);
-                response.getWriter().write(array.toString());
+                response.getWriter().write(this.array.toString());
             }
             break;
+
+            case "listar_inactivas": {
+                MedicinaJpaControler medicinaJpaControl = new MedicinaJpaControler();
+                // Asumimos que tienes un método similar a findMedicamentoInactivos o traes todos y filtras
+                List<Medicamento> lista = medicinaJpaControl.findMedicamentoEntities(); // Traemos todos
+
+                JSONArray listaJson = new JSONArray();
+                if (lista != null) {
+                    for (Medicamento m : lista) {
+                        if (!m.isActivo()) { // Filtramos los inactivos
+                            JSONObject obj = new JSONObject();
+                            obj.put("idMedicamento", m.getIdMedicamento());
+                            obj.put("nombre", m.getNombre());
+                            obj.put("stock", m.getCantidadExistencias());
+                            listaJson.put(obj);
+                        }
+                    }
+                }
+                response.getWriter().write(listaJson.toString());
+                break;
+            }
+
+            case "reactivar": {
+                MedicinaJpaControler medicinaJpaControl = new MedicinaJpaControler();
+                int id = Integer.parseInt(request.getParameter("idMedicamento"));
+
+                // Lógica de reactivación manual si no tienes el método específico
+                // Recuperamos, cambiamos estado y editamos
+                try {
+                    Medicamento med = medicinaJpaControl.findMedicamento(id);
+                    if (med != null) {
+                        med.setActivo(true); // Reactivamos
+                        medicinaJpaControl.edit(med);
+                        json.put("resultado", "exito");
+                    } else {
+                        json.put("resultado", "error");
+                    }
+                } catch (Exception ex) {
+                    json.put("resultado", "error");
+                    ex.printStackTrace();
+                }
+
+                this.array.put(json);
+                response.getWriter().write(this.array.toString());
+                break;
+            }
 
             case "editar_consultar": {
                 JSONObject medicamentoJsonObject = new JSONObject();
@@ -274,8 +336,8 @@ public class medicinaServlet extends HttpServlet {
                     medicamentoJsonObject.put("cantidadExistencias", this.medicinaRecuperada.getCantidadExistencias());
                     medicamentoJsonObject.put("precioUnidad", this.medicinaRecuperada.getPrecioUnidad());
                     medicamentoJsonObject.put("precioTotal", this.medicinaRecuperada.getPrecioTotal());
-                    medicamentoJsonObject.put("fechaIngreso",  formatoFe.format(medicinaRecuperada.getFechaIngreso()));
-                    medicamentoJsonObject.put("fechaDeExpiracion",  formatoFe.format(medicinaRecuperada.getFechaDeExpiracion()));
+                    medicamentoJsonObject.put("fechaIngreso", formatoFe.format(medicinaRecuperada.getFechaIngreso()));
+                    medicamentoJsonObject.put("fechaDeExpiracion", formatoFe.format(medicinaRecuperada.getFechaDeExpiracion()));
                     medicamentoJsonObject.put("descripcion", this.medicinaRecuperada.getDescripcion());
                     medicamentoJsonObject.put("activo", this.medicinaRecuperada.isActivo() ? "activo" : "inactivo");
 

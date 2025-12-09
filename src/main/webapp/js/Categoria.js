@@ -1,34 +1,36 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/JavaScript.js to edit this template
- */
-
-
 const btnCategoria = document.querySelector("#registrar_Categoria");
 const formularioCategoria = document.querySelector("#formulario_Categoria");
 const title = document.querySelector("#exampleModalLabel");
-const error = document.querySelector("#error");
 
 document.addEventListener("DOMContentLoaded", () => {
     cargarDatos();
     $('#formulario_Categoria').parsley();
 });
 
+// ABRIR MODAL
 btnCategoria.addEventListener('click', () => {
     formularioCategoria.reset();
     $('#formulario_Categoria').parsley().reset();
-    title.innerHTML = "<h5 class='modal-title'\n\
- id='exampleModalLabel'>Registro nueva Categoria\n\
-<br><sub> Todos los campos son obligatorios</sub>";
-    $("#md_registrar_categoria").modal("show");
-    console.log("entró a cargar modal ");
-    $("#idCategoria").hide(); 
-    $("#labelId").hide(); 
+    
+    title.innerHTML = '<i class="bi bi-tag-fill me-2"></i> Registro Nueva Categoría';
+    
+    const myModal = new bootstrap.Modal(document.getElementById('md_registrar_categoria'));
+    myModal.show();
+    
+    $("#divIdCategoria").hide(); 
+    $("#opcion").val("insertar");
+    document.querySelector("#estado_activo").checked = true;
 });
 
 const cargarDatos = () => {
-    mostrar_cargando("Procesando Solicitud",
-            "Espere un momento mientras se obtiene la información solicitada");
+    // Spinner
+    $("#tablita").html(`
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Cargando categorías...</p>
+        </div>
+    `);
+
     const datos = {"opcion": "consultar"};
     $.ajax({
         dataType: "json",
@@ -39,37 +41,56 @@ const cargarDatos = () => {
         if (json[0].resultado === "exito") {
             $("#tablita").empty().html(json[0].tabla);
 
+            // DataTables Configuración
             $("#tabla_categoria").DataTable({
-                "language": {
-                    "url": "https://cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"
-
-
-                }
+                responsive: true,
+                language: {
+                    "decimal": "",
+                    "emptyTable": "No hay información",
+                    "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
+                    "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+                    "infoFiltered": "(Filtrado de _MAX_ total entradas)",
+                    "infoPostFix": "",
+                    "thousands": ",",
+                    "lengthMenu": "Mostrar _MENU_ Entradas",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar:",
+                    "zeroRecords": "Sin resultados encontrados",
+                    "paginate": {
+                        "first": "Primero",
+                        "last": "Ultimo",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    }
+                },
+                dom: '<"d-flex justify-content-between align-items-center mb-3"lf>rt<"d-flex justify-content-between align-items-center mt-3"ip>'
             });
-            document.querySelector("#categoria_registradas").textContent
-                    = json[0].cantidad;
+            
+            if(document.querySelector("#categoria_registradas")){
+                document.querySelector("#categoria_registradas").textContent = json[0].cantidad;
+            }
         } else {
-            Swal.fire(
-                    "Error",
-                    "No se pudo completar la petición, intentelo más tarde",
-                    "error"
-                    );
+            Swal.fire("Error", "No se pudo cargar la tabla", "error");
         }
     }).fail(function () {
+        console.log("Error al cargar datos");
     });
 };
 
-
-
-/// PARA INSERTAR DATOS
-formularioCategoria.addEventListener("submit", (e) => {
+// INSERTAR O ACTUALIZAR
+$(document).on("submit", "#formulario_Categoria", function (e) {
     e.preventDefault();
+    
+    const formInstance = $(this).parsley();
+    if (!formInstance.isValid()) {
+        return;
+    }
 
-    const datos = $("#formulario_Categoria").serialize();
-    console.log("DATOS A INSERTAR/MODIFICAR " + datos);
-    console.log("document.querySelector opcion.value"
-            + document.querySelector("#opcion").value);
-    if (document.querySelector("#opcion").value === "insertar") {          
+    const datos = $(this).serialize();
+    const opcion = document.querySelector("#opcion").value;
+
+    if (opcion === "insertar") {           
         $.ajax({
             dataType: "json",
             method: "POST",
@@ -79,31 +100,21 @@ formularioCategoria.addEventListener("submit", (e) => {
             if (json[0].resultado === "exito") {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Categoria Registrada',
+                    title: '¡Registrado!',
+                    text: 'Categoría guardada correctamente',
                     showConfirmButton: false,
                     timer: 1500
                 });
                 formularioCategoria.reset();
-                $("#md_registrar_categoria").modal("hide");
-                setTimeout(() => {
-                    cargarDatos();
-                }, 1500);
+                $('#md_registrar_categoria').modal('hide');
+                $('.modal-backdrop').remove();
+                cargarDatos();
             } else {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'No se logró insertar el registro',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+                Swal.fire('Atención', 'No se logró insertar (posible duplicado)', 'warning');
             }
-        }).fail(function () {
         });
 
-
-
-// modificar
-
-    } else {
+    } else { // ACTUALIZAR
         $.ajax({
             dataType: "json",
             method: "POST",
@@ -114,57 +125,34 @@ formularioCategoria.addEventListener("submit", (e) => {
                 $("#opcion").val("insertar");
                 Swal.fire({
                     icon: 'success',
-                    title: 'Categoria Actualizada',
+                    title: '¡Actualizado!',
+                    text: 'Categoría modificada correctamente',
                     showConfirmButton: false,
                     timer: 1500
                 });
                 formularioCategoria.reset();
-                $("#md_registrar_categoria").modal("hide");
-                setTimeout(() => {
-                    cargarDatos();
-                }, 1500);
+                $('#md_registrar_categoria').modal('hide');
+                $('.modal-backdrop').remove();
+                cargarDatos();
             } else {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'No se logró actualizar el registro',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+                Swal.fire('Error', 'No se logró actualizar', 'error');
             }
-        }).fail(function () {
         });
-
     }
 });
 
-
-
-function mostrar_cargando(titulo, mensaje = "") {
-    Swal.fire({
-        title: titulo,
-        html: mensaje,
-        timer: 2000,
-        timerProgressBar: true,
-        didOpen: () => {
-            Swal.showLoading();
-        },
-        willClose: () => {
-        }
-    }).then((result) => {
-        if (result.dismiss === Swal.DismissReason.timer) {
-        }
-    });
-}
-
-
+// ABRIR EDITAR (CORREGIDO: DELEGACIÓN DE EVENTOS)
 document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("btn_editar")) {
-        $("#idCategoria").show();
-        $("#labelId").show();
+    // Usamos .closest() para que funcione al dar clic en el ícono
+    if (e.target.closest(".btn_editar")) {
+        const btn = e.target.closest(".btn_editar");
+        const id = btn.getAttribute("data-id");
+        
+        $("#divIdCategoria").show();
         $('#formulario_Categoria').parsley().reset();
 
-        title.innerHTML = "<h5 class='modal-title' id='exampleModalLabel'>Editar Categoria<br><sub> Todos los campos son obligatorios</sub>";
-        const id = e.target.getAttribute("data-id");
+        title.innerHTML = '<i class="bi bi-pencil-square"></i> Editar Categoría';
+        
         var datos = { "opcion": "editar_consultar", "idCategoria": id };
 
         $.ajax({
@@ -174,140 +162,125 @@ document.addEventListener("click", (e) => {
             data: datos
         }).done(function (json) {
             if (json[0].resultado === "exito") {
-                
                 $("#contenedor_inactivas").hide();
                 $("#lista_categorias_inactivas").empty();
 
                 document.querySelector("#idCategoria").value = json[0].categoria.idCategoria;
                 document.querySelector("#nombreCategoria").value = json[0].categoria.nombreCategoria;
                 document.querySelector("#descripcion").value = json[0].categoria.descripcion;
-                document.querySelector(`input[name="estado"][value="${json[0].categoria.estado}"]`).checked = true;
+                
+                // Setear radio buttons
+                if(json[0].categoria.estado === "activo"){
+                    document.querySelector("#estado_activo").checked = true;
+                } else {
+                    document.querySelector("#estado_inactivo").checked = true;
+                }
 
                 document.querySelector("#idCategoria").readOnly = true;
-                $("#md_registrar_categoria").modal("show");
+                
+                const myModal = new bootstrap.Modal(document.getElementById('md_registrar_categoria'));
+                myModal.show();
+                
                 $("#opcion").val("si_actualizalo");
             } else {
-                Swal.fire(
-                    "Error",
-                    "No se pudo completar la petición, intentelo más tarde",
-                    "error"
-                );
+                Swal.fire("Error", "No se encontraron datos", "error");
             }
         });
     }
 });
 
-
-
-
-    $(document).on("click", ".btn_eliminar", function (e) {
-        e.preventDefault();
-        Swal.fire({
-            title: '¿Desea eliminar el registro?',
-            text: 'Al continuar, no podrá ser revertido y los datos serán borrados completamente',
-            showDenyButton: true,
-            showCancelButton: false,
-            confirmButton: 'si',
-            denyButton: 'NO'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                eliminar($(this).attr('data-id'));
-            } else if (result.isDenied) {
-                Swal.fire("Opcion cancelada por el usuario", '', 'info');
-            }
-        });
+// ELIMINAR
+$(document).on("click", ".btn_eliminar", function (e) {
+    e.preventDefault();
+    const id = $(this).closest('button').getAttribute('data-id');
+    
+    Swal.fire({
+        title: '¿Eliminar Categoría?',
+        text: 'Pasará a la lista de inactivas',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            eliminar(id);
+        }
     });
-
-
-
+});
 
 function eliminar(id) {
-    mostrar_cargando("Procesando solicitud", "Espere mientras se eliminan los datos " + id);
     var datos = {"opcion": "eliminar", "idCategoria": id};
-    console.log("id a eliminar es: " + id);
     $.ajax({
         dataType: "json",
         method: "POST",
         url: "categoriaServelet",
         data: datos
     }).done(function (json) {
-        Swal.close();
         if (json[0].resultado === "exito") {
-            Swal.fire(
-                    'Excelente',
-                    'El dato fue eliminado',
-                    'success'
-                    );
+            Swal.fire('Eliminado', 'La categoría ha sido desactivada.', 'success');
             cargarDatos();
         } else {
-            Swal.fire(
-                    'Error',
-                    'No se pudo eliminar el dato intentelo más tarde',
-                    'error'
-                    );
+            Swal.fire('Error', 'No se pudo eliminar', 'error');
         }
-    }).fail(function () {
-        console.log("Error al eliminar");
-    }).always(function () {
-        console.log("Error al eliminar");
     });
 }
 
-
-
+// LISTAR INACTIVAS (AQUÍ ESTABA EL ERROR DEL BOTÓN VERDE)
 $(document).ready(function () {
-  
     $("#mostrar_inactivas").on("click", function () {
         const contenedor = $("#contenedor_inactivas");
         contenedor.slideToggle();
 
-        if (contenedor.is(":visible")) {
+        if (contenedor.is(":visible") || contenedor.css('display') !== 'none') {
+            const lista = $("#lista_categorias_inactivas");
+            lista.html('<p class="text-center text-muted">Cargando...</p>');
+            
             $.ajax({
                 method: "POST",
                 url: "categoriaServelet",
                 data: { opcion: "listar_inactivas" }, 
                 dataType: "json"
             }).done(function (data) {
-                const lista = $("#lista_categorias_inactivas");
                 lista.empty();
-
                 if (data.length === 0) {
-                    lista.append("<p>No hay categorías inactivas.</p>");
+                    lista.append('<div class="alert alert-light text-center mb-0">No hay categorías inactivas.</div>');
                 } else {
                     data.forEach(cat => {
+                        // DISEÑO CORREGIDO IDÉNTICO AL USUARIO
                         lista.append(`
-                            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <div class="d-flex justify-content-between align-items-center bg-white p-3 mb-2 rounded shadow-sm border-start border-4 border-danger">
                                 <div>
-                                    <strong>${cat.nombre}</strong><br>
-                                    <small>${cat.descripcion}</small>
+                                    <div class="fw-bold text-dark">${cat.nombre}</div>
+                                    <div class="small text-muted">${cat.descripcion}</div>
                                 </div>
-                                <button class="btn btn-su${cat.nombre}</strong><br>
-                                    <small>${cat.descripcion}</ccess btn-sm reactivar-categoria" data-id="${cat.idCategoria}">
-                                    Reactivar
+                                <button class="btn btn-outline-success btn-sm reactivar-categoria px-3" data-id="${cat.idCategoria}">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reactivar
                                 </button>
                             </div>
                         `);
                     });
                 }
             }).fail(() => {
-                $("#lista_categorias_inactivas").html("<p>Error al cargar las categorías inactivas.</p>");
+                lista.html("<p class='text-danger'>Error al cargar las categorías inactivas.</p>");
             });
         }
     });
-
-   
 });
 
+// REACTIVAR
 $(document).on("click", ".reactivar-categoria", function (e) {
     e.preventDefault(); 
-
-    const idCategoria = $(this).data("id");
+    // Usamos closest para asegurar que capturamos el data-id aunque se de click en el icono
+    const idCategoria = $(this).closest('button').attr('data-id');
 
     Swal.fire({
         title: "¿Reactivar categoría?",
-        text: "Esta acción reactivará la categoría seleccionada.",
-        icon: "warning",
+        text: "La categoría volverá a estar disponible.",
+        icon: "question",
         showCancelButton: true,
+        confirmButtonColor: '#28a745',
         confirmButtonText: "Sí, reactivar",
         cancelButtonText: "Cancelar",
     }).then((result) => {
@@ -319,31 +292,30 @@ $(document).on("click", ".reactivar-categoria", function (e) {
                     opcion: "reactivar",
                     idCategoria: idCategoria
                 },
+                dataType: "json",
                 success: function (response) {
-                    if (response[0]?.resultado === "exito") {
+                    // Verificamos si viene como array o objeto directo
+                    let resultado = response[0] ? response[0].resultado : response.resultado;
+                    
+                    if (resultado === "exito") {
                         Swal.fire({
                             icon: "success",
                             title: "Reactivado",
-                            text: "La categoría fue reactivada exitosamente",
+                            text: "Categoría recuperada exitosamente",
                             showConfirmButton: false,
                             timer: 1500
                         });
-
-                        
-                        setTimeout(() => {
-                            location.reload(); 
-                        }, 1600);
-
+                        cargarDatos(); 
+                        $("#mostrar_inactivas").click(); 
+                        setTimeout(() => { $("#mostrar_inactivas").click(); }, 500); 
                     } else {
-                        Swal.fire("Error", "No se pudo reactivar la categoría", "error");
+                        Swal.fire("Error", "No se pudo reactivar", "error");
                     }
                 },
                 error: function () {
-                    Swal.fire("Error", "Error en la petición AJAX", "error");
+                    Swal.fire("Error", "Fallo de conexión", "error");
                 }
             });
         }
     });
 });
-
-

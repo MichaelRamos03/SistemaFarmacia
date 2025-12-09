@@ -1,38 +1,39 @@
-
 const btnAddPersona = document.querySelector("#registrar_Persona");
 const formularioPersona = document.querySelector("#formulario_Persona");
 const combo = document.querySelector("#idUsuario");
 const title = document.querySelector("#exampleModalLabel");
-const error = document.querySelector("#error");
 
 document.addEventListener("DOMContentLoaded", () => {
     cargarCombos();
     cargarDatos();
 
+    // Select2 con tema Bootstrap 5
     $('#idUsuario').select2({
-        dropdownParent: $('#md_registrar_Persona')
+        dropdownParent: $('#md_registrar_Persona'),
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Seleccione un usuario'
     });
+
     $('#formulario_Persona').parsley();
 });
 
-// PARA CARGAR EL MODAL QUE PERMITE REGISTRAR EL USUARIO
+// ABRIR MODAL
 btnAddPersona.addEventListener('click', () => {
     formularioPersona.reset();
     $('#formulario_Persona').parsley().reset();
     $('#idUsuario').val("").trigger('change');
-    title.innerHTML = "<h5 class='modal-title'\n\
- id='exampleModalLabel'>Registro nueva Persona\n\
-<br><sub> Todos los campos son obligatorios</sub>";
-    $("#md_registrar_Persona").modal("show");
-    console.log("entró a cargar modal ");
-    $("#idPersona").hide(); // ESTE SE OCULTA PORQUE SE GENERA DE FORMA AUTOMÁTICA
-    $("#labelPersona").hide(); // ESTE SE OCULTA PORQUE SE GENERA DE FORMA AUTOMÁTICA
+    
+    title.innerHTML = '<i class="bi bi-person-plus-fill"></i> Registro Nuevo Empleado';
+    
+    const myModal = new bootstrap.Modal(document.getElementById('md_registrar_Persona'));
+    myModal.show();
+    
+    $("#divIdPersona").hide();
 });
 
 const cargarCombos = () => {
     var datos = {"opcion": "cargarCombos"};
-    console.log(datos);
-
     $.ajax({
         dataType: "json",
         method: "POST",
@@ -40,19 +41,28 @@ const cargarCombos = () => {
         data: datos
     }).done(function (json) {
         if (json[0].resultado === "exito") {
-            combo.innerHTML += json[0].usuario;
-            console.log(json[0].usuario);
+            combo.innerHTML = '<option value="" disabled selected>Seleccione...</option>' + json[0].usuario;
         } else {
-            console.log("error Usuarios");
+            console.log("Error cargando usuarios");
         }
     }).fail(function () {
+        console.log("Fallo ajax combos");
     });
 };
 
 const cargarDatos = () => {
-    mostrar_cargando("Procesando Solicitud",
-            "Espere un momento mientras se obtiene la información solicitada");
+    // Spinner mientras carga
+    $("#tablita").html(`
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 text-muted">Cargando datos...</p>
+        </div>
+    `);
+
     const datos = {"opcion": "consultar"};
+    
     $.ajax({
         dataType: "json",
         method: "POST",
@@ -62,40 +72,57 @@ const cargarDatos = () => {
         if (json[0].resultado === "exito") {
             $("#tablita").empty().html(json[0].tabla);
 
+            // --- CORRECCIÓN IMPORTANTE: IDIOMA INCRUSTADO (NO URL) ---
             $("#tabla_persona").DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"
-                }
+                responsive: true,
+                language: {
+                    "decimal": "",
+                    "emptyTable": "No hay información",
+                    "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
+                    "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+                    "infoFiltered": "(Filtrado de _MAX_ total entradas)",
+                    "infoPostFix": "",
+                    "thousands": ",",
+                    "lengthMenu": "Mostrar _MENU_ Entradas",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar:",
+                    "zeroRecords": "Sin resultados encontrados",
+                    "paginate": {
+                        "first": "Primero",
+                        "last": "Ultimo",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    }
+                },
+                dom: '<"d-flex justify-content-between align-items-center mb-3"lf>rt<"d-flex justify-content-between align-items-center mt-3"ip>'
             });
-            document.querySelector("#personas_registradas").textContent
-                    = json[0].cantidad;
+
+            if(document.querySelector("#personas_registradas")){
+                document.querySelector("#personas_registradas").textContent = json[0].cantidad;
+            }
         } else {
-            Swal.fire(
-                    "Error",
-                    "No se pudo completar la petición, intentelo más tarde",
-                    "error"
-                    );
+            Swal.fire("Error", "No se pudo cargar la tabla", "error");
         }
-    }).fail(function () {
+    }).fail(function (jqXHR, textStatus) {
+        console.error("Error AJAX:", textStatus);
+        $("#tablita").html('<div class="alert alert-danger">Error de conexión al cargar datos.</div>');
     });
 };
 
-
-
-/// PARA INSERTAR DATOS
-formularioPersona.addEventListener("submit", (e) => {
+// INSERTAR O ACTUALIZAR
+$(document).on("submit", "#formulario_Persona", function (e) {
     e.preventDefault();
-    if (!$('#idUsuario').parsley().isValid() ||
-            !$('#idUsuario').parsley().isValid()
-            ) {
-        e.preventDefault();
+    
+    const formInstance = $(this).parsley();
+    if (!formInstance.isValid()) {
         return;
     }
-    const datos = $("#formulario_Persona").serialize();
-    console.log("DATOS A INSERTAR/MODIFICAR " + datos);
-    console.log("document.querySelector opcion.value"
-            + document.querySelector("#opcion").value);
-    if (document.querySelector("#opcion").value === "insertar") { //INSERTAR         
+    
+    const datos = $(this).serialize();
+    const opcion = document.querySelector("#opcion").value;
+
+    if (opcion === "insertar") {
         $.ajax({
             dataType: "json",
             method: "POST",
@@ -105,31 +132,22 @@ formularioPersona.addEventListener("submit", (e) => {
             if (json[0].resultado === "exito") {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Persona Registrada',
+                    title: '¡Registrado!',
+                    text: 'Empleado guardado correctamente',
                     showConfirmButton: false,
                     timer: 1500
                 });
                 formularioPersona.reset();
-                $("#md_registrar_Persona").modal("hide");
-                setTimeout(() => {
-                    cargarDatos();
-                }, 1500);
+                $('#md_registrar_Persona').modal('hide');
+                $('.modal-backdrop').remove();
+                cargarDatos();
             } else {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'No se logró insertar el registro',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+                // Muestra un mensaje si falla (duplicado)
+                Swal.fire('Atención', 'No se logró insertar. Verifique que el DUI o el Usuario no estén repetidos.', 'warning');
             }
-        }).fail(function () {
         });
 
-
-
-// modificar
-
-    } else {
+    } else { // ACTUALIZAR
         $.ajax({
             dataType: "json",
             method: "POST",
@@ -140,54 +158,35 @@ formularioPersona.addEventListener("submit", (e) => {
                 $("#opcion").val("insertar");
                 Swal.fire({
                     icon: 'success',
-                    title: 'Persona Actualizada',
+                    title: 'Actualizado',
+                    text: 'Datos modificados correctamente',
                     showConfirmButton: false,
                     timer: 1500
                 });
                 formularioPersona.reset();
-                $("#md_registrar_Persona").modal("hide");
-                setTimeout(() => {
-                    cargarDatos();
-                }, 1500);
+                $('#md_registrar_Persona').modal('hide');
+                $('.modal-backdrop').remove();
+                cargarDatos();
             } else {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'No se logró actualizar el registro',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+                Swal.fire('Info', 'No se logró actualizar', 'info');
             }
-        }).fail(function () {
         });
-
     }
 });
 
-function mostrar_cargando(titulo, mensaje = "") {
-    Swal.fire({
-        title: titulo,
-        html: mensaje,
-        timer: 2000,
-        timerProgressBar: true,
-        didOpen: () => {
-            Swal.showLoading();
-        },
-        willClose: () => {
-        }
-    }).then((result) => {
-        if (result.dismiss === Swal.DismissReason.timer) {
-        }
-    });
-}
-
+// ABRIR EDITAR
 document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("btn_editar")) {
-        $("#idPersona").show();
-        $("#labelPersona").show();
+    if (e.target.closest(".btn_editar")) {
+        const btn = e.target.closest(".btn_editar");
+        const id = btn.getAttribute("data-id");
+        
+        $("#divIdPersona").show();
         $('#formulario_Persona').parsley().reset();
-        title.innerHTML = "<h5 class='modal-title' id='exampleModalLabel'>Editar Persona<br><sub> Todos los campos son obligatorios</sub>";
-        const id = e.target.getAttribute("data-id");
+        
+        title.innerHTML = '<i class="bi bi-pencil-square"></i> Editar Empleado';
+        
         var datos = {"opcion": "editar_consultar", "id": id};
+        
         $.ajax({
             dataType: "json",
             method: "POST",
@@ -197,82 +196,63 @@ document.addEventListener("click", (e) => {
             if (json[0].resultado === "exito") {
                 document.querySelector("#idPersona").value = json[0].persona.idPersona;
                 document.querySelector("#nombre").value = json[0].persona.nombre;
+                
+                // Formato fecha correcto
                 document.querySelector("#fechaNacimiento").value = json[0].persona.fechaNacimiento;
+                
                 document.querySelector("#dui").value = json[0].persona.dui;
                 document.querySelector("#telefono").value = json[0].persona.telefono;
-                document.querySelector("#idUsuario").value = json[0].persona.id;
-             
+                
                 document.querySelector("#idPersona").readOnly = true;
                 
-                $('#idUsuario').val(json[0].persona.id).trigger('change');
-                $("#md_registrar_Persona").modal("show");
+                // Setear Select2
+                $('#idUsuario').val(json[0].persona.idUsuario).trigger('change');
+                
                 $("#opcion").val("si_actualizalo");
+                
+                const myModal = new bootstrap.Modal(document.getElementById('md_registrar_Persona'));
+                myModal.show();
             } else {
-                Swal.fire(
-                        "Error",
-                        "No se pudo completar la petición, intentelo más tarde",
-                        "error"
-                        );
+                Swal.fire("Error", "No se encontraron datos", "error");
             }
-        }).fail(function () {
-        }).always(function () {
         });
     }
+});
 
-    $(document).on("click", ".btn_eliminar", function (e) {
-        e.preventDefault();
-        Swal.fire({
-            title: '¿Desea eliminar el registro?',
-            text: 'Al continuar, no podrá ser revertido y los datos serán borrados completamente',
-            showDenyButton: true,
-            showCancelButton: false,
-            confirmButton: 'si',
-            denyButton: 'NO'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                eliminar($(this).attr('data-id'));
-            } else if (result.isDenied) {
-                Swal.fire("Opcion cancelada por el usuario", '', 'info');
-            }
-        });
+// ELIMINAR
+$(document).on("click", ".btn_eliminar", function (e) {
+    e.preventDefault();
+    const id = $(this).data('id'); 
+    
+    Swal.fire({
+        title: '¿Eliminar registro?',
+        text: "Esta acción borrará permanentemente al empleado.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            eliminar(id);
+        }
     });
 });
 
 function eliminar(id) {
-    mostrar_cargando("Procesando solicitud", "Espere mientras se eliminan los datos " + id);
     var datos = {"opcion": "eliminar", "id": id};
-    console.log("id a eliminar es: " + id);
     $.ajax({
         dataType: "json",
         method: "POST",
         url: "PersonaServlet",
         data: datos
     }).done(function (json) {
-        Swal.close();
         if (json[0].resultado === "exito") {
-            Swal.fire(
-                    'Excelente',
-                    'El dato fue eliminado',
-                    'success'
-                    );
+            Swal.fire('Eliminado', 'El registro ha sido borrado.', 'success');
             cargarDatos();
         } else {
-            Swal.fire(
-                    'Error',
-                    'No se pudo eliminar el dato intentelo más tarde',
-                    'error'
-                    );
+            Swal.fire('Error', 'No se pudo eliminar', 'error');
         }
-    }).fail(function () {
-        console.log("Error al eliminar");
-    }).always(function () {
-        console.log("Error al eliminar");
     });
 }
-
-
-
-
-
-
-

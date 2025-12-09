@@ -1,0 +1,126 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 8 dic 2025, 11:33:03 p. m.
+    Author     : Michael Ramos;
+*/
+
+/* =========================================
+   ESTILOS GENERALES (TEMA MORADO)
+   ========================================= */
+:root {
+    --color-primary-purple: #59359a;
+    --color-primary-hover: #45287a;
+    --color-soft-info: #e0f7fa;
+    --color-text-info: #006064;
+    --color-danger-soft: #fde8e8;
+    --color-danger-text: #9b1c1c;
+    --border-radius-card: 10px;
+}
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Color Texto y Fondos */
+.text-dark-purple { color: var(--color-primary-purple) !important; }
+.bg-purple { background-color: var(--color-primary-purple) !important; color: white; }
+
+/* =========================================
+   TARJETAS (CARDS)
+   ========================================= */
+.card-stat {
+    border: none;
+    border-radius: var(--border-radius-card);
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: white;
+}
+
+/* Tarjetas con acción (Click) */
+.card-action {
+    cursor: pointer;
+}
+
+.card-action:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Borde izquierdo rojo para tarjeta de papelera */
+.card-border-danger-left {
+    border-left: 5px solid #dc3545 !important;
+}
+
+/* =========================================
+   BOTONES
+   ========================================= */
+.btn-purple {
+    background-color: var(--color-primary-purple);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-purple:hover {
+    background-color: var(--color-primary-hover);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(89, 53, 154, 0.2);
+}
+
+/* =========================================
+   FORMULARIOS
+   ========================================= */
+.form-label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+/* Inputs fusionados con iconos */
+.input-group-text {
+    background-color: white;
+    color: #6c757d;
+    border: 1px solid #ced4da;
+    border-right: none;
+}
+
+.input-group .form-control {
+    border-left: none;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--color-primary-purple);
+    box-shadow: 0 0 0 0.25rem rgba(89, 53, 154, 0.25);
+    z-index: 3;
+}
+
+/* Alertas */
+.alert-custom {
+    background-color: var(--color-soft-info);
+    color: var(--color-text-info);
+    border: 1px solid #b2ebf2;
+    border-radius: 6px;
+}
+
+/* Modales */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Validaciones Parsley */
+.parsley-errors-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 5px;
+    color: #dc3545;
+    font-size: 0.85em;
+}
+
+.hidden { display: none !important; }

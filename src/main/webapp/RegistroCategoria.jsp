@@ -1,246 +1,191 @@
 <%-- 
     Document   : RegistroCategoria
-    Created on : 27 may 2025, 8:43:46 p. m.
+    Created on : 27 may 2025
     Author     : Gaby Laínez
+    Redesign   : Bootstrap 5 Theme
 --%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Registro de Categorias</title>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Categorías</title>
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css">
 
-        <!-- Inicio para que funcione class='dropdown m-b-10' -->
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s" crossorigin="anonymous"></script>
-        <!-- Fin para que funcione class='dropdown m-b-10' -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 
-        <!-- Inicio para que funcione sweetalert2@11 -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <!-- Fin para que funcione class='Mensajes sweetalert2@11 -->
+    <link rel="stylesheet" href="css/estilosUsuario.css">
+</head>
+<body class="bg-light">
 
-        <script  src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <div class="container-fluid p-4">
 
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark-purple"><i class="bi bi-tags-fill"></i> Gestión de Categorías</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="Menu.jsp">Inicio</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Categorías</li>
+                </ol>
+            </nav>
+        </div>
 
-
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-
-
-        <!-- jQuery -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-        <!-- Select2 CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
-
-        <!-- Select2 JS -->
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
-
-
-
-        <!-- Parsley.js -->
-        <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
-
-        <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
-
-
-        <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/i18n/es.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/i18n/es.extra.js"></script>
-
-
-        <!-- DataTables JS -->
-        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-        <!-- DataTables CSS -->
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-
-
-    </head>
-    <body class="fixed-left">
-
-        <!-- Begin page -->
-        <div id="wrapper">
-
-            <!-- Start right Content here -->
-            <div class="content-page">
-                <!-- Start content -->
-                <div class="content">
-                    <!-- Top Bar Start -->
-
-                    <!-- Top Bar End -->
-                    <!-- ==================
-                    PAGE CONTENT START
-                    ================== -->
-                    <style>
-                        .error{
-                            color: #EA553D;
-                            font-size: 12px;
-                            transition: .3s color ease-in-out;
-                        }
-                        .hidden{
-                            color: #000000;
-                            display: none;
-                        }
-                    </style>
-                    <div class="page-content-wrapper">
-                        <div class="container-fluid">
-                            <div class="row">
-
-                                <div class="row align-items-center mb-3">
-                                    <div class="col-md-6 col-xl-6">
-                                        <div class="mini-stat clearfix bg-white">
-                                            <span class="mini-stat-icon bg-blue-grey mr-0 float-right">
-                                                <i class="mdi mdi-black-mesa"></i>
-                                            </span>
-                                            <div class="mini-stat-info">
-                                                <span id="categoria_registradas" class="counter text-blue-grey">0</span>
-                                                Categorías registradas
-                                            </div>
-                                            <div class="clearfix"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-3 col-xl-3">
-                                        <div class="mini-stat clearfix bg-white" id="registrar_Categoria" style="cursor: pointer;">
-                                            <span class="mini-stat-icon bg-teal mr-0 float-right"><i class="mdi mdi-account"></i></span>
-                                            <div class="mini-stat-info">
-                                                <span class="counter text-teal">Registrar</span>
-                                                Categoría
-                                            </div>
-                                            <div class="clearfix"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-3 col-xl-3 d-flex justify-content-end">
-                                        <div class="mini-stat clearfix bg-white" id="mostrar_inactivas" style="cursor: pointer;">
-                                            <span class="mini-stat-icon bg-danger mr-0 float-right"><i class="mdi mdi-restore"></i></span>
-                                            <div class="mini-stat-info">
-                                                <span class="counter text-danger">Reactivar</span>
-                                                Categorías
-                                            </div>
-                                            <div class="clearfix"></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                                <div class="row mt-3" id="contenedor_inactivas" style="display:none;">
-                                    <div class="col-12">
-                                        <div class="card border border-danger">
-                                            <div class="card-header bg-danger text-white">
-                                                Categorías Inactivas
-                                            </div>
-                                            <div class="card-body" id="lista_categorias_inactivas">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="card m-b-20">
-                                        <div class="card-body">
-                                            <div id="tablita"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div><!-- container -->
-                    </div> <!-- Page content Wrapper -->
-                </div> <!-- content -->
-
-            </div>
-            <!-- End Right content here -->
-
-
-
-
-            <div class="modal fade" id="md_registrar_categoria" role="dialog"  aria-hidden="true">
-
-
-
-
-
-                <div class="modal-dialog modal-lg" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">REGISTRAR NUEVA CATEGORIA<br>
-                                <sub> Todos los campos son obligatorios</sub>
-                            </h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card card-stat shadow-sm border-0 h-100">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted text-uppercase mb-1">Total Registradas</h6>
+                            <h2 class="fw-bold text-primary mb-0" id="categoria_registradas">0</h2>
                         </div>
-                        <div class="modal-body">
-                            <form name="formulario_Categoria" id="formulario_Categoria" data-parsley-validate>
-                                <input type="hidden" id="opcion" name="opcion"
-                                       value="insertar">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label id="labelId">Numero de Categoria</label>
-                                            <input type="text" autocomplete="off" name="idCategoria" id="idCategoria"
-                                                   val="" class="form-control" maxlength="5" />
-                                        </div>
-                                    </div>
-
-                                    <div class="row">                                   
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>NOMBRE DE CATEGORIA</label>
-                                                <input type="text" class="form-control"
-                                                       name="nombreCategoria" id="nombreCategoria" required  data-parsley-required-message="El nombre de la categoría es obligatorio"
-                                                       data-parsley-minlength="3"
-                                                       data-parsley-minlength-message="Debe tener al menos 3 caracteres"
-                                                       data-parsley-pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
-                                                       data-parsley-pattern-message="Solo se permiten letras y espacios"/>
-                                                <p class="error hidden" id="error">Campo requerido</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>DESCRIPCION</label>
-                                                <input type="text" class="form-control" 
-                                                       name="descripcion" id="descripcion" required data-parsley-required-message="La descripción es obligatoria"
-                                                       data-parsley-minlength="5"
-                                                       data-parsley-maxlength="100"
-                                                       data-parsley-minlength-message="Debe tener al menos 5 caracteres"
-                                                       data-parsley-maxlength-message="No puede exceder los 100 caracteres"/>
-                                                <p class="error hidden" id="error">Campo requerido</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>ESTADO</label><br>
-
-                                                <input type="radio" name="estado" id="estado_activo" value="activo" required/>
-                                                <label for="estado_activo">Activo</label>
-
-                                                <input type="radio" name="estado" id="estado_inactivo" value="inactivo" />
-                                                <label for="estado_inactivo">Inactivo</label>
-
-                                                <p class="error hidden" id="error">Campo requerido</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <div class="modal-footer">
-                                        <button type="button" 
-                                                class="btn btn-secondary cerrar" 
-                                                data-dismiss="modal" aria-label="Close">Cerrar</button>
-                                        <button type="submit" class="btn btn-primary">Guardar</button>
-                                    </div>
-                            </form>
+                        <div class="icon-box bg-primary-soft text-primary rounded-circle">
+                            <i class="bi bi-bookmarks-fill fs-4"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <div class="col-md-4">
+                <div class="card card-action shadow-sm border-0 h-100 bg-purple text-white" id="registrar_Categoria" style="cursor: pointer;">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold mb-0">Nueva Categoría</h5>
+                            <small class="text-white-50">Click para crear registro</small>
+                        </div>
+                        <div class="icon-box bg-white text-purple rounded-circle">
+                            <i class="bi bi-plus-lg fs-4 fw-bold"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="col-md-4">
+                <div class="card card-action shadow-sm border-0 h-100 bg-pink text-white" id="mostrar_inactivas" style="cursor: pointer;">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold mb-0">Papelera</h5>
+                            <small class="text-white-50">Ver eliminados</small>
+                        </div>
+                        <div class="icon-box bg-white text-pink rounded-circle">
+                            <i class="bi bi-trash fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <div class="row mb-4" id="contenedor_inactivas" style="display:none;">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm border-start border-danger border-5">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title text-danger mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Categorías Inactivas</h5>
+                    </div>
+                    <div class="card-body bg-light">
+                        <div id="lista_categorias_inactivas">
+                            <p class="text-muted text-center mb-0">Cargando...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <script src="js/Categoria.js"></script>
+        <div class="card shadow border-0 rounded-3">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 text-secondary fw-bold">Listado General</h5>
+            </div>
+            <div class="card-body">
+                <div id="tablita" class="table-responsive">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Cargando datos...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="md_registrar_categoria" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-purple text-white">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        <i class="bi bi-tag-fill me-2"></i> Datos de la Categoría
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <form name="formulario_Categoria" id="formulario_Categoria" data-parsley-validate novalidate>
+                        <input type="hidden" id="opcion" name="opcion" value="insertar">
+
+                        <div class="alert alert-info py-2 small mb-3">
+                            <i class="bi bi-info-circle-fill me-2"></i> Todos los campos son obligatorios.
+                        </div>
+
+                        <div class="mb-3" id="divIdCategoria" style="display:none;">
+                            <label class="form-label text-muted fw-bold">ID Categoría</label>
+                            <input type="text" name="idCategoria" id="idCategoria" class="form-control bg-light" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted fw-bold">Nombre</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-bookmark-star"></i></span>
+                                <input type="text" class="form-control" name="nombreCategoria" id="nombreCategoria" required 
+                                       placeholder="Ej: Antibióticos"
+                                       data-parsley-minlength="3" 
+                                       data-parsley-pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                                       data-parsley-error-message="Solo letras y espacios">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted fw-bold">Descripción</label>
+                            <textarea class="form-control" name="descripcion" id="descripcion" rows="2" required
+                                      data-parsley-minlength="5" data-parsley-maxlength="100"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted fw-bold d-block">Estado</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="estado" id="estado_activo" value="activo" checked required>
+                                <label class="btn btn-outline-success" for="estado_activo"><i class="bi bi-check-circle"></i> Activo</label>
+
+                                <input type="radio" class="btn-check" name="estado" id="estado_inactivo" value="inactivo">
+                                <label class="btn btn-outline-danger" for="estado_inactivo"><i class="bi bi-x-circle"></i> Inactivo</label>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer border-top-0 px-0 mt-4">
+                            <button type="button" class="btn btn-light text-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary bg-purple border-0 px-4 shadow-sm">
+                                <i class="bi bi-save me-1"></i> Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/i18n/es.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <script src="js/Categoria.js"></script>
+</body>
+</html>

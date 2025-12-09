@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+  <!-- Define Persistence Unit -->
+  <persistence-unit name="EclipseLink_JPA" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <properties>
+      <!-- URL de conexión para PostgreSQL -->
+      <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/sistemaFarmacia"/>
+      <property name="jakarta.persistence.jdbc.user" value="postgres"/>
+      <property name="jakarta.persistence.jdbc.password" value="root"/>
+      <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+      <!-- Dialecto de EclipseLink para PostgreSQL -->
+      <property name="eclipselink.target-database" value="PostgreSQL"/>
+      <!-- Configuración de generación de esquema -->
+      <property name="jakarta.persistence.schema-generation.database.action" value="update"/>
+      <!-- Opcional: Mostrar consultas SQL en la consola -->
+      <property name="eclipselink.logging.level" value="FINE"/>
+      <property name="eclipselink.logging.parameters" value="true"/>
+      <property name="jakarta.persistence.provider" value="org.eclipse.persistence.jpa.PersistenceProvider"/>
+    </properties>
+  </persistence-unit>
+  <persistence-unit name="com.ues.edu_SistemaFarmacia_war_1.0-SNAPSHOTPU" transaction-type="JTA">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <properties>
+      <property name="jakarta.persistence.schema-generation.database.action" value="update"/>
+    </properties>
+  </persistence-unit>
+</persistence>

@@ -1,0 +1,78 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 11 jun 2025, 9:50:37 a. m.
+    Author     : Gaby Laínez
+*/
+
+body {
+    margin: 0;
+    font-family: 'Georgia', serif;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background: #5a2ca0; 
+    color: white;
+    padding: 32px;
+    position: fixed;
+    left: -250px; 
+    transition: left 0.3s ease-in-out;
+    top: 0;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 10px 0;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+}
+
+.sidebar ul li a:hover {
+    background: #7a42c4;
+}
+
+body {
+    background-image: url('../img/Fondo.jpeg');
+    background-size: cover; 
+    background-position: center;
+    background-repeat: no-repeat; 
+    height: 100vh; 
+}
+
+
+#menu-toggle {
+    position: fixed;
+    top: 0px;
+    left: -2px;
+    font-size: 29px;
+    cursor: pointer;
+    background: #cd1ff8d8;
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 4px;
+    z-index: 1000; 
+    transition: left 0.3s ease-in-out;
+}
+
+
+.content {
+    flex: 1;
+    padding: 85px;
+    transition: margin-left 0.3s ease-in-out;
+}

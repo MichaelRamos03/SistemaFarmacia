@@ -1,95 +1,139 @@
-/*
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
-*/
-/* 
-    Created on : 11 jun 2025, 9:50:37 a. m.
-    Author     : Gaby Laínez
-*/
+/* DISEÑO MENÚ - ESTILO FARMACIA PURPLE */
+
+:root {
+    --sidebar-bg: #5a2ca0;        /* Morado Principal */
+    --sidebar-bg-hover: #451d80;  /* Morado Oscuro para Hover */
+    --text-color: #ffffff;
+    --accent-color: #cd1ff8d8;    /* Acento Rosa/Lila */
+}
+
 body {
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente moderna */
-    background-image: url('../img/Fondo.jpeg');
-    background-size: cover; 
-    background-position: center;
-    background-repeat: no-repeat; 
-    min-height: 100vh; 
+    background-color: #f3f4f7;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
     overflow-x: hidden; /* Evita scroll horizontal al abrir menú */
 }
 
-/* --- SIDEBAR (Tus colores) --- */
+/* --- SIDEBAR (BARRA LATERAL) --- */
 .sidebar {
-    width: 250px;
-    height: 100vh;
-    background: #5a2ca0; /* Tu color morado base */
-    color: white;
-    padding: 20px;
     position: fixed;
-    left: -250px; /* Oculto por defecto */
     top: 0;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Animación suave */
-    z-index: 999;
+    left: -260px; /* Oculto por defecto */
+    width: 260px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--sidebar-bg) 0%, var(--sidebar-bg-hover) 100%);
+    color: var(--text-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    overflow-y: auto;
 }
 
 .sidebar-header {
-    margin-bottom: 20px;
+    padding: 25px 20px;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header h3 {
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+/* --- ENLACES DEL MENÚ --- */
+.nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    padding: 15px 25px;
+    font-size: 1.05rem;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    border-left: 4px solid transparent;
+}
+
+.nav-link i {
+    font-size: 1.3rem;
+    width: 35px; /* Para alinear texto */
     text-align: center;
 }
 
-/* Estilo de los enlaces del menú */
-.sidebar .nav-link {
-    color: rgba(255, 255, 255, 0.9);
-    padding: 12px 15px;
-    border-radius: 8px;
-    margin-bottom: 5px;
-    transition: background 0.3s;
-    font-weight: 500;
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-left: 4px solid var(--accent-color);
+    transform: translateX(5px);
 }
 
-/* Efecto Hover (Tu color morado claro) */
-.sidebar .nav-link:hover {
-    background: #7a42c4; /* Tu color hover */
-    color: white;
-    transform: translateX(5px); /* Pequeño movimiento a la derecha */
+/* Enlace activo (si quisieras marcarlo) */
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-left: 4px solid #fff;
 }
 
-/* Estilo especial para Cerrar Sesión */
-.sidebar .logout-link {
-    background-color: rgba(0,0,0,0.2);
+/* Botón Cerrar Sesión */
+.logout-link {
+    background-color: rgba(220, 53, 69, 0.1); /* Rojo suave */
     color: #ffcccc !important;
-}
-.sidebar .logout-link:hover {
-    background-color: #dc3545 !important; /* Rojo Bootstrap al pasar mouse */
-    color: white !important;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* --- BOTÓN TOGGLE --- */
+.logout-link:hover {
+    background-color: #dc3545; /* Rojo fuerte */
+    color: white !important;
+    border-left: 4px solid #b02a37;
+}
+
+/* --- CONTENIDO PRINCIPAL --- */
+.content {
+    padding: 20px;
+    padding-top: 80px; /* Espacio para el botón toggle */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+}
+
+/* --- BOTÓN HAMBURGUESA --- */
 #menu-toggle {
     position: fixed;
-    top: 15px;
-    left: 15px;
-    font-size: 24px;
-    cursor: pointer;
-    background: #cd1ff8d8; /* Tu color rosado/morado */
+    top: 20px;
+    left: 20px;
+    background-color: var(--sidebar-bg);
     color: white;
     border: none;
-    border-radius: 8px;
-    z-index: 1000; 
-    transition: left 0.3s ease-in-out;
+    border-radius: 50%;
     width: 50px;
     height: 50px;
+    font-size: 1.5rem;
+    z-index: 1100; /* Encima del sidebar */
+    cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 #menu-toggle:hover {
-    filter: brightness(1.1); /* Brilla un poco al pasar el mouse */
+    transform: scale(1.1);
+    background-color: var(--sidebar-bg-hover);
 }
 
-/* --- CONTENIDO PRINCIPAL --- */
-.content {
-    padding: 85px 20px 20px 20px;
-    transition: margin-left 0.3s ease-in-out;
-    width: 100%;
+/* Fondo de bienvenida */
+.card-welcome {
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #ffffff 0%, #f3f4f7 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decoración opcional de fondo */
+.bg-decoration {
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    font-size: 15rem;
+    color: rgba(90, 44, 160, 0.05); /* Logo gigante transparente */
+    z-index: 0;
+    pointer-events: none;
 }

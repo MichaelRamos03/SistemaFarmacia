@@ -1,8 +1,10 @@
+/*
+ * Servlet actualizado con diseño de botones Bootstrap 5 y Paleta Farmacia
+ */
 package com.ues.edu.controller;
 
 import com.ues.edu.controler.persistencia.PersonaJpaControler;
 import com.ues.edu.controler.persistencia.ventaJpaControler;
-// IMPORTANTE: Importamos el controlador de detalles y la entidad
 import com.ues.edu.controler.persistencia.detalleJpaControler;
 import com.ues.edu.entities.Persona;
 import com.ues.edu.entities.Venta;
@@ -126,18 +128,19 @@ public class ventaServlet extends HttpServlet {
 
             case "consultar": {
                 ventaJpaControler ventaJpaControl = new ventaJpaControler(); 
-                String html = "<table class=\"table\" id=\"tabla_venta\""
-                        + "class=\"table table-bordered dt-responsive nowrap\" width=\"100%\">\n"
-                        + "  <thead>\n"
+                // TABLA ACTUALIZADA CON CLASES BOOTSTRAP 5 Y DISEÑO LIMPIO
+                String html = "<table id=\"tabla_venta\" class=\"table table-hover table-bordered nowrap\" style=\"width:100%\">\n"
+                        + "  <thead class=\"bg-light\">\n"
                         + "    <tr>\n"
                         + "      <th scope=\"col\">#</th>\n"
-                        + "      <th scope=\"col\">FechaVenta:</th>\n"
-                        + "      <th scope=\"col\">Vendedor:</th>\n"
-                        + "      <th scope=\"col\">Usuario:</th>\n"
-                        + "      <th scope=\"col\" style='min-width: 250px;'>Acciones:</th>\n" 
+                        + "      <th scope=\"col\">Fecha Emisión</th>\n"
+                        + "      <th scope=\"col\">Vendedor</th>\n"
+                        + "      <th scope=\"col\">Usuario</th>\n"
+                        + "      <th scope=\"col\" class=\"text-center\" style='min-width: 200px;'>Acciones</th>\n"
                         + "    </tr>\n"
                         + "  </thead>\n"
                         + "  <tbody>";
+                
                 this.ventaList = new ArrayList<>();
                 this.ventaList = ventaJpaControl.findVentaEntities();
                 int cont = 0;
@@ -146,35 +149,41 @@ public class ventaServlet extends HttpServlet {
                 for (Venta objVenta : this.ventaList) {
                     cont++;
                     html += "  <tr>\n"
-                            + "      <td>" + i + "</td>\n"
-                            + "      <td>" + objVenta.getFechaVenta() + "</td>\n"
-                            + "      <td>" + objVenta.getPersona().getNombrePersona() + "</td>\n"
-                            + "      <td>" + objVenta.getPersona().getUsuario().getUsuario() + "</td>\n"
-                            + "      <td>"
+                            + "      <td class='align-middle fw-bold'>" + i + "</td>\n"
+                            + "      <td class='align-middle'>" + objVenta.getFechaVenta() + "</td>\n"
+                            + "      <td class='align-middle'>" + objVenta.getPersona().getNombrePersona() + "</td>\n"
+                            + "      <td class='align-middle'><span class='badge bg-purple-light text-purple'>" + objVenta.getPersona().getUsuario().getUsuario() + "</span></td>\n"
+                            + "      <td class='align-middle text-center'>\n"
                             
-                            // === BOTÓN FACTURA (Con opciones) ===
-                            + "         <div class='dropdown m-b-10' style='display:inline-block; vertical-align: middle; margin-right: 5px;'>"
-                            + "             <button class='btn btn-danger btn-sm dropdown-toggle'"
-                            + "                 type='button' id='ddFactura" + objVenta.getId() + "' data-toggle='dropdown' aria-haspopup='true'"
-                            + "                 aria-expanded='false'> Factura</button>"
-                            + "             <div class='dropdown-menu' aria-labelledby='ddFactura" + objVenta.getId() + "'>"
-                            + "                 <a class='dropdown-item' href='javascript:void(0)' onclick='imprimirFactura(" + objVenta.getId() + ", \"fiscal\")'>Crédito Fiscal</a>"
-                            + "                 <a class='dropdown-item' href='javascript:void(0)' onclick='imprimirFactura(" + objVenta.getId() + ", \"final\")'>Consumidor Final</a>"
-                            + "             </div>"
-                            + "         </div>"
+                            // --- CONTENEDOR DE ACCIONES ---
+                            + "        <div class='d-flex justify-content-center align-items-center gap-2'>\n"
                             
-                            // === BOTÓN ACCIONES ===
-                            + "         <div class='dropdown m-b-10' style='display:inline-block; vertical-align: middle;'>"
-                            + "             <button class='btn btn-secondary dropdown-toggle btn-sm'"
-                            + "                 type='button' id='dropdownMenuButton' data-toggle='dropdown' aria-haspopup='true'"
-                            + "                 aria-expanded='false'> Seleccione</button>"
-                            + "             <div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>"
-                            + "                 <a class='dropdown-item btn_eliminar' data-id='" + objVenta.getId() + "' href='javascript:void(0) '>Eliminar</a>"
-                            + "                 <a class='dropdown-item btn_editar' data-id='" + objVenta.getId() + "' href='javascript:void(0) '>Actualizar</a>"
-                            + "             </div>"
-                            + "         </div>"
-                            + "      </td>"
-                            + " </tr>";
+                            // 1. DROPDOWN FACTURA (Estilo btn-outline-invoice = CIAN)
+                            + "          <div class='dropdown'>\n"
+                            + "            <button class='btn btn-sm btn-outline-invoice dropdown-toggle' type='button' id='ddFactura" + objVenta.getId() + "' data-bs-toggle='dropdown' aria-expanded='false'>\n"
+                            + "              <i class='bi bi-receipt'></i> Factura\n"
+                            + "            </button>\n"
+                            + "            <ul class='dropdown-menu shadow' aria-labelledby='ddFactura" + objVenta.getId() + "'>\n"
+                            + "              <li><a class='dropdown-item' href='javascript:void(0)' onclick='imprimirFactura(" + objVenta.getId() + ", \"fiscal\")'>Crédito Fiscal</a></li>\n"
+                            + "              <li><a class='dropdown-item' href='javascript:void(0)' onclick='imprimirFactura(" + objVenta.getId() + ", \"final\")'>Consumidor Final</a></li>\n"
+                            + "            </ul>\n"
+                            + "          </div>\n"
+                            
+                            // 2. BOTÓN EDITAR (Estilo btn-outline-purple = MORADO)
+                            + "          <button class='btn btn-sm btn-outline-purple btn_editar' data-id='" + objVenta.getId() + "' title='Editar'>\n"
+                            + "             <i class='bi bi-pencil-fill'></i>\n"
+                            + "          </button>\n"
+
+                            // 3. BOTÓN ELIMINAR (Estilo btn-outline-danger = ROJO)
+                            + "          <button class='btn btn-sm btn-outline-danger btn_eliminar' data-id='" + objVenta.getId() + "' title='Eliminar'>\n"
+                            + "             <i class='bi bi-trash-fill'></i>\n"
+                            + "          </button>\n"
+                            
+                            + "        </div>\n"
+                            // --- FIN ACCIONES ---
+                            
+                            + "      </td>\n"
+                            + "  </tr>";
                     i++;
                 }
                 html += "  </tbody></table>";
@@ -210,74 +219,68 @@ public class ventaServlet extends HttpServlet {
 
             case "eliminar": {
                 try {
-                    String resultado = "";
                     ventaJpaControler ventaModel = new ventaJpaControler(); 
                     int idElim = Integer.parseInt(request.getParameter("idVenta"));
-                    resultado = ventaModel.destroy(idElim);
+                    
+                    // Intentamos eliminar
+                    String resultado = ventaModel.destroy(idElim);
+                    
                     if ("exito".equals(resultado)) {
                         this.json.put("resultado", "exito");
                     } else {
                         this.json.put("resultado", "error_eliminar");
                     }
                 } catch (NonexistentEntityException ex) {
-                    Logger.getLogger(ventaServlet.class.getName()).log(Level.SEVERE, null, ex);
+                    this.json.put("resultado", "error_no_existe");
+                } catch (Exception ex) {
+                    // AQUÍ CAPTURAMOS EL ERROR DE INTEGRIDAD (Cuando hay productos asociados)
+                    ex.printStackTrace(); // Esto imprime el error real en la consola de Netbeans/Tomcat
+                    this.json.put("resultado", "error_integridad"); 
                 }
+                
+                this.array.put(this.json);
+                response.getWriter().write(this.array.toString());
             }
-            this.array.put(this.json);
-            response.getWriter().write(this.array.toString());
             break;
             
-            // =========================================================================
-            // AQUÍ ESTÁ LA LÓGICA DE LA FACTURA REAL (CON DATOS DE LA BD Y VISTA PREVIA)
-            // =========================================================================
             case "generarFactura": {
+                // ... (MANTUVE TU LÓGICA DE FACTURA INTACTA, SOLO CAMBIA EL CSS DE LA VISTA PREVIA) ...
                 int idVenta = Integer.parseInt(request.getParameter("idVenta"));
                 String tipoDocumento = request.getParameter("tipoDocumento");
                 
-                // 1. Buscamos la Venta Principal (Encabezado)
                 ventaJpaControler ventaJpaControl = new ventaJpaControler(); 
                 Venta ventaEncontrada = ventaJpaControl.findVenta(idVenta);
                 
-                // 2. Buscamos los Detalles de esa Venta (Productos)
                 detalleJpaControler detalleControl = new detalleJpaControler();
                 List<detalleVenta> listaDetalles = detalleControl.findDetalleVentaByIdVenta(idVenta);
                 
                 String htmlFactura = "";
                 
                 if (ventaEncontrada != null) {
-                    // Configuración Visual según tipo
                     String titulo = (tipoDocumento.equals("fiscal")) ? "COMPROBANTE DE CRÉDITO FISCAL" : "FACTURA CONSUMIDOR FINAL";
-                    String colorHeader = (tipoDocumento.equals("fiscal")) ? "#8B0000" : "#ea553d"; // Rojo Oscuro vs Naranja
+                    String colorHeader = (tipoDocumento.equals("fiscal")) ? "#8B0000" : "#5a2ca0"; // Morado para Final, Rojo para Fiscal
                     
-                    // --- Construcción de Filas de Productos ---
                     StringBuilder filasHtml = new StringBuilder();
                     double totalFactura = 0.0;
                     
                     if(listaDetalles != null && !listaDetalles.isEmpty()){
                         for(detalleVenta det : listaDetalles){
                             filasHtml.append("<tr>");
-                            // Asumiendo que detalleVenta tiene relación con Medicamento
                             filasHtml.append("<td>").append(det.getMedicamento().getNombre()).append("</td>"); 
                             filasHtml.append("<td style='text-align:center'>").append(det.getCantidadProducto()).append("</td>");
-                            
-                            // Calculamos precio unitario (Total / Cantidad) para mostrarlo
                             double precioUnitario = det.getTotalVendido() / det.getCantidadProducto();
                             filasHtml.append("<td style='text-align:right'>$").append(String.format("%.2f", precioUnitario)).append("</td>");
-                            
                             filasHtml.append("<td style='text-align:right'>$").append(String.format("%.2f", det.getTotalVendido())).append("</td>");
                             filasHtml.append("</tr>");
-                            
                             totalFactura += det.getTotalVendido();
                         }
                     } else {
-                        filasHtml.append("<tr><td colspan='4' style='text-align:center'>No hay productos registrados en esta venta</td></tr>");
+                        filasHtml.append("<tr><td colspan='4' style='text-align:center'>No hay productos registrados</td></tr>");
                     }
 
-                    // --- Construcción del HTML Completo (Con estilos para Imprimir/Cerrar) ---
                     htmlFactura += "<html><head><title>" + titulo + " #" + idVenta + "</title>";
                     htmlFactura += "<style>";
                     htmlFactura += "body { font-family: 'Helvetica', Arial, sans-serif; padding: 30px; color: #333; }";
-                    // CSS para ocultar botones al imprimir
                     htmlFactura += "@media print { .no-print { display: none !important; } }";
                     htmlFactura += ".header { display: flex; justify-content: space-between; border-bottom: 3px solid " + colorHeader + "; padding-bottom: 10px; margin-bottom: 20px; }";
                     htmlFactura += ".empresa h1 { color: " + colorHeader + "; margin: 0; font-size: 24px; }";
@@ -288,10 +291,9 @@ public class ventaServlet extends HttpServlet {
                     htmlFactura += ".btn-accion { padding: 8px 15px; color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 14px; margin-left: 10px; text-decoration: none; display: inline-block; font-weight: bold; }";
                     htmlFactura += "</style></head><body>";
                     
-                    // BARRA DE HERRAMIENTAS (Vista Previa)
                     htmlFactura += "<div class='no-print' style='background: #f1f1f1; padding: 10px; margin-bottom: 20px; border-radius: 5px; text-align: right; border: 1px solid #ccc;'>";
                     htmlFactura += "<span style='float:left; font-weight:bold; padding-top:5px; color:#555;'>VISTA PREVIA</span>";
-                    htmlFactura += "<button onclick='window.print()' class='btn-accion' style='background-color: #28a745;'>🖨️ IMPRIMIR</button>";
+                    htmlFactura += "<button onclick='window.print()' class='btn-accion' style='background-color: #5a2ca0;'>🖨️ IMPRIMIR</button>";
                     htmlFactura += "<button onclick='window.close()' class='btn-accion' style='background-color: #dc3545;'>❌ CERRAR</button>";
                     htmlFactura += "</div>";
                     

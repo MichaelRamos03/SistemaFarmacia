@@ -1,30 +1,21 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/JavaScript.js to edit this template
+/* * Funciones JS para el Login - Estilo Farmacia
  */
 
 $(document).ready(function () {
     $('#loginForm').submit(function (e) {
         e.preventDefault();
 
-        // 1. Referencias a los elementos visuales
+        // 1. Referencias
         var btn = $('#btnIngresar');
         var spinner = $('#spinnerCarga');
         var texto = $('#textoBtn');
         var icono = $('#iconoBtn');
-        var mensaje = $('#mensaje');
 
         // 2. ACTIVAR MODO CARGA
-        // Desactivamos el botón para evitar doble clic
         btn.prop('disabled', true);
-        // Mostramos el spinner
         spinner.removeClass('d-none');
-        // Cambiamos el texto
         texto.text('Validando...');
-        // Ocultamos el icono de la puerta para que no se vea amontonado
         icono.addClass('d-none');
-        // Limpiamos mensajes de error previos
-        mensaje.text('');
 
         const datos = {
             usuario: $('#nombreUsuario').val(),
@@ -36,35 +27,56 @@ $(document).ready(function () {
             method: 'POST',
             url: 'LoginServlet',
             data: datos,
-            // Agregamos un pequeño retraso artificial (opcional) para que se aprecie la animación
-            // Si tu servidor es muy rápido, el spinner solo parpadeará.
             success: function (response) {
                 if (response.success) {
-                    // Si es correcto, cambiamos texto a "Entrando..." y redirigimos
                     texto.text('Entrando...');
-                    // No habilitamos el botón porque ya nos vamos de la página
-                    window.location.href = 'Menu.jsp';
+                    
+                    // Pequeña alerta de éxito antes de redirigir
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                    
+                    Toast.fire({
+                        icon: 'success',
+                        title: '¡Bienvenido ' + (response.nombre || '') + '!'
+                    });
+
+                    setTimeout(() => {
+                        window.location.href = 'Menu.jsp';
+                    }, 1000);
+                    
                 } else {
-                    // ERROR DE CREDENCIALES
-                    mostrarError('Usuario o contraseña incorrectos.');
+                    restaurarBoton();
+                    // Alerta bonita en lugar de texto plano
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Acceso Denegado',
+                        text: 'Usuario o contraseña incorrectos',
+                        confirmButtonColor: '#5a2ca0' // Color morado
+                    });
                 }
             },
             error: function () {
-                // ERROR DE SERVIDOR
-                mostrarError('Error en la conexión con el servidor.');
+                restaurarBoton();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Error de Conexión',
+                    text: 'No se pudo conectar con el servidor',
+                    confirmButtonColor: '#ea553d' // Color naranja error
+                });
             }
         });
 
         // Función auxiliar para restaurar el botón si algo sale mal
-        function mostrarError(msg) {
-            // Mostramos el mensaje rojo
-            mensaje.text(msg);
-            
-            // Restauramos el botón a su estado original
+        function restaurarBoton() {
             btn.prop('disabled', false);
-            spinner.addClass('d-none'); // Ocultar spinner
-            texto.text('INGRESAR');     // Volver texto original
-            icono.removeClass('d-none');// Mostrar icono puerta
+            spinner.addClass('d-none');
+            texto.text('INGRESAR');     
+            icono.removeClass('d-none');
         }
     });
 });

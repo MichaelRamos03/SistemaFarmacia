@@ -1,229 +1,182 @@
 <%-- 
     Document   : RegistroPersona
-    Created on : 5 jun 2025, 3:56:46 p. m.
+    Created on : 5 jun 2025
     Author     : Gaby Laínez
 --%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html lang="es">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Registro Persona</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Gestión de Personal | Farmacia</title>
 
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+        
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+        <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css">
 
-        <!-- Inicio para que funcione class='dropdown m-b-10' -->
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s" crossorigin="anonymous"></script>
-        <!-- Fin para que funcione class='dropdown m-b-10' -->
-
-        <!-- Inicio para que funcione sweetalert2@11 -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <!-- Fin para que funcione class='Mensajes sweetalert2@11 -->
-
-        <script  src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-
-
-
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-
-
-        <!-- jQuery -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-        <!-- Select2 CSS -->
         <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 
-        <!-- Select2 JS -->
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+        <link rel="stylesheet" href="css/estilosFarmacia.css">
 
-
-        <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
-
-
-        <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/i18n/es.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/i18n/es.extra.js"></script>
-
-
-
-        <!-- DataTables JS -->
-        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-        <!-- DataTables CSS -->
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-
-
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     </head>
-    <body class="fixed-left">
+    <body class="bg-light">
 
-        <!-- Begin page -->
-        <div id="wrapper">
+        <div class="container-fluid p-4">
 
-            <!-- Start right Content here -->
-            <div class="content-page">
-                <!-- Start content -->
-                <div class="content">
-                    <!-- Top Bar Start -->
-
-                    <!-- Top Bar End -->
-                    <!-- ==================
-                    PAGE CONTENT START
-                    ================== -->
-                    <style>
-                        .error{
-                            color: #EA553D;
-                            font-size: 12px;
-                            transition: .3s color ease-in-out;
-                        }
-                        .hidden{
-                            color: #000000;
-                            display: none;
-                        }
-                    </style>
-                    <div class="page-content-wrapper">
-                        <div class="container-fluid">
-                            <div class="row">
-                                <div class="col-md-6 col-xl-6">
-                                    <div class="mini-stat clearfix bg-white">
-                                        <span class="mini-stat-icon bg-blue-grey mr-0 float-right"><i
-                                                20
-                                                class="mdi mdi-black-mesa"></i></span>
-                                        <div class="mini-stat-info">
-                                            <span id="personas_registradas" class="counter text-blue-grey">0</span>
-                                            Registro Personal
-                                        </div>
-                                        <div class="clearfix"></div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 col-xl-6" id="registrar_Persona" style="cursor: pointer;">
-                                    <div class="mini-stat clearfix bg-white">
-                                        <span class="mini-stat-icon bg-teal mr-0 float-right"><i
-                                                class="mdi mdi-account"></i></span>
-                                        <div class="mini-stat-info">
-                                            <span class="counter text-teal">Registrar</span>
-                                            Personal
-                                        </div>
-                                        <div class="clearfix"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="card m-b-20">
-                                        <div class="card-body">
-                                            <div id="tablita"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div><!-- container -->
-                    </div> <!-- Page content Wrapper -->
-                </div> <!-- content -->
-
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-dark-purple"><i class="bi bi-people-fill"></i> Directorio de Personal</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="Menu.jsp" class="text-decoration-none text-muted">Inicio</a></li>
+                        <li class="breadcrumb-item active text-purple" aria-current="page">Personal</li>
+                    </ol>
+                </nav>
             </div>
-            <!-- End Right content here -->
 
-
-
-
-            <div class="modal fade" id="md_registrar_Persona" role="dialog"  aria-hidden="true">
-
-
-
-
-
-                <div class="modal-dialog modal-lg" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Registro nuevo empleado<br>
-                                <sub> Todos los campos son obligatorios</sub>
-                            </h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card card-stat shadow-sm border-0 h-100">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted text-uppercase mb-1">Total Empleados</h6>
+                                <h2 class="fw-bold text-dark-purple mb-0" id="personas_registradas">0</h2>
+                            </div>
+                            <div class="icon-box bg-primary-soft text-purple rounded-circle">
+                                <i class="bi bi-person-lines-fill fs-4"></i>
+                            </div>
                         </div>
-                        <div class="modal-body">
-                            <form name="formulario_Persona" id="formulario_Persona" data-parsley-validate>
-                                <input type="hidden" id="opcion" name="opcion"
-                                       value="insertar">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label  id="labelPersona" >Id Empleado</label>
-                                            <input type="text" autocomplete="off"                                                  
-                                                   name="idPersona" id="idPersona"
-                                                   val=""
-                                                   class="form-control" maxlength="5"/>
-                                        </div>
-                                    </div>
+                    </div>
+                </div>
 
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Usuario</label>
-                                            <select  id="idUsuario"  name="idUsuario" 
-                                                     data-parsley-error-message="Debe seleccionar una opción válida" 
-                                                     class="form-control bg-light" >
-                                                <option value="" disabled selected >Seleccione una opción</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">                                   
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Nombre:</label>
-                                            <input type="text" class="form-control"
-                                                   name="nombre" id="nombre"  data-parsley-pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
-                                                   data-parsley-required-message="El nombre es obligatorio"
-                                                   data-parsley-pattern-message="Solo se permiten letras y espacios"/>
-                                            <p class="error hidden" id="error">Campo requerido</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Fecha Nacimiento: </label>
-                                            <input type="date" class="form-control" 
-                                                   name="fechaNacimiento" id="fechaNacimiento" required/>
-                                            <p class="error hidden" id="error">Campo requerido</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Dui:</label>
-                                            <input type="text" class="form-control" 
-                                                   name="dui" id="dui" required   data-parsley-pattern="^\d{8}-\d{1}$"
-                                                   data-parsley-required-message="Debe ingresar el DUI"
-                                                   data-parsley-error-message="Formato válido: 12345678-9"/>
-                                            <p class="error hidden" id="error">Campo requerido</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Telefono</label>
-                                            <input type="text" class="form-control" 
-                                                   name="telefono" id="telefono" required data-parsley-pattern="^[267]{1}[0-9]{7}$"
-                                                   data-parsley-required-message="Debe ingresar el teléfono"
-                                                   data-parsley-error-message="Teléfono inválido (formato: 7XXXXXXXX)"/>
-                                            <p class="error hidden" id="error">Campo requerido</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                                <div class="modal-footer">
-                                    <button type="button" 
-                                            class="btn btn-secondary cerrar" 
-                                            data-dismiss="modal" aria-label="Close">Cerrar</button>
-                                    <button type="submit" class="btn btn-primary">Guardar</button>
-                                </div>
-                            </form>
+                <div class="col-md-6">
+                    <div class="card card-action shadow-sm border-0 h-100 bg-purple text-white" id="registrar_Persona">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold mb-0">Nuevo Empleado</h5>
+                                <small class="text-white-50">Click para registrar</small>
+                            </div>
+                            <div class="icon-box bg-white text-purple rounded-circle">
+                                <i class="bi bi-person-plus-fill fs-4"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <script src="js/Persona.js"></script>
+            <div class="card shadow border-0 rounded-3">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="mb-0 text-secondary"><i class="bi bi-table"></i> Listado General</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive" id="tablita">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 text-muted">Cargando...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <div class="modal fade" id="md_registrar_Persona" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+
+                    <div class="modal-header bg-purple text-white">
+                        <h5 class="modal-title" id="exampleModalLabel">
+                            <i class="bi bi-person-vcard"></i> Datos del Empleado
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body p-4">
+                        <form name="formulario_Persona" id="formulario_Persona" data-parsley-validate>
+                            <input type="hidden" id="opcion" name="opcion" value="insertar">
+
+                            <div class="alert alert-info py-2 small mb-4">
+                                <i class="bi bi-info-circle-fill"></i> Complete los campos marcados.
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-12" id="divIdPersona" style="display:none;">
+                                    <label class="form-label fw-bold text-muted small">ID EMPLEADO</label>
+                                    <input type="text" name="idPersona" id="idPersona" class="form-control bg-light" readonly>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold text-muted small">USUARIO DE SISTEMA</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-person-workspace text-purple"></i></span>
+                                        <div class="flex-grow-1">
+                                            <select id="idUsuario" name="idUsuario" class="form-select" required style="width:100%;">
+                                                <option value="" disabled selected>Seleccione...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-muted small">NOMBRE COMPLETO</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-person text-purple"></i></span>
+                                        <input type="text" class="form-control" name="nombre" id="nombre" required 
+                                               data-parsley-pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                                               data-parsley-error-message="Solo letras">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-muted small">FECHA NACIMIENTO</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-calendar-date text-purple"></i></span>
+                                        <input type="date" class="form-control" name="fechaNacimiento" id="fechaNacimiento" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-muted small">DUI</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-card-heading text-purple"></i></span>
+                                        <input type="number" class="form-control" name="dui" id="dui" required placeholder="Sin guiones">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-muted small">TELÉFONO</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-telephone text-purple"></i></span>
+                                        <input type="number" class="form-control" name="telefono" id="telefono" required placeholder="70000000">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer px-0 pb-0 border-top-0 mt-4">
+                                <button type="button" class="btn btn-light text-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary bg-purple border-0 px-4 shadow-sm">
+                                    <i class="bi bi-save"></i> Guardar Datos
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+        <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+        <script src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap5.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/i18n/es.js"></script>
+
+        <script src="js/Persona.js"></script>
+    </body>
+</html>

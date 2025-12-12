@@ -78,72 +78,83 @@ public class consultaServelet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
 
-         SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy"); // Formato más común
 
-        
-        request.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
+    request.setCharacterEncoding("UTF-8");
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
 
-        String op = request.getParameter("opcion");
-        System.out.println("OPCION EN doPost: " + op);
+    String op = request.getParameter("opcion");
+    System.out.println("OPCION EN doPost: " + op);
 
-        if (op == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Parámetro 'opcion' es requerido");
-            return;
-        }
-
-        switch (op) {
-            case "consultar": {
-                ConsultaJpaControler consultaJpaController = new ConsultaJpaControler();
-
-                StringBuilder html = new StringBuilder();
-                html.append("<table class=\"table table-bordered dt-responsive nowrap\" id=\"tabla\" width=\"100%\">\n")
-                        .append("  <thead>\n")
-                        .append("    <tr>\n")
-                        .append("      <th scope=\"col\">NOMBRE</th>\n")
-                        .append("      <th scope=\"col\">DESCRIPCION</th>\n")
-                        .append("      <th scope=\"col\">FECHA INGRESO</th>\n")
-                        .append("      <th scope=\"col\">DISPONIBLES</th>\n")
-                        .append("      <th scope=\"col\">ESTADO</th>\n")
-                        .append("    </tr>\n")
-                        .append("  </thead>\n")
-                        .append("  <tbody>\n");
-
-                List<Medicamento> consultaList = consultaJpaController.findMedicamentoEntities();
-
-                for (Medicamento M : consultaList) {
-                
-                        html.append("  <tr>\n")
-                                .append("      <td>").append(M.getNombre()).append("</td>\n")
-                                .append("      <td>").append(M.getDescripcion()).append("</td>\n")
-                                .append("      <td>").append(formatoFecha.format(M.getFechaIngreso())).append("</td>\n")
-                                .append("      <td>").append(M.getCantidadExistencias()).append("</td>\n")
-                               .append("      <td>").append(M.isActivo()? "Activo" : "Inactivo").append("</td>\n")
-                                .append("</td>\n");
-
-                    
-                }
-
-                html.append("  </tbody>\n</table>");
-
-                json = new JSONObject();
-                json.put("resultado", "exito");
-                json.put("tabla", html.toString());
-
-                array = new JSONArray();
-                array.put(json);
-
-                response.getWriter().write(array.toString());
-                break;
-            }
-            default:
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Opción no válida");
-        }
+    if (op == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Parámetro 'opcion' es requerido");
+        return;
     }
+
+    // Variables JSON
+    JSONArray array = new JSONArray();
+    JSONObject json = new JSONObject();
+
+    switch (op) {
+        case "consultar": {
+            ConsultaJpaControler consultaJpaController = new ConsultaJpaControler();
+
+            StringBuilder html = new StringBuilder();
+            
+            // Tabla con diseño Bootstrap 5 (table-hover, borderless header)
+            html.append("<table class=\"table table-hover table-bordered nowrap\" id=\"tabla\" width=\"100%\">\n")
+                    .append("  <thead class=\"bg-light\">\n")
+                    .append("    <tr>\n")
+                    .append("      <th scope=\"col\">Nombre</th>\n")
+                    .append("      <th scope=\"col\">Descripción</th>\n")
+                    .append("      <th scope=\"col\" class=\"text-center\">Fecha Ingreso</th>\n")
+                    .append("      <th scope=\"col\" class=\"text-center\">Stock</th>\n")
+                    .append("      <th scope=\"col\" class=\"text-center\">Estado</th>\n")
+                    .append("    </tr>\n")
+                    .append("  </thead>\n")
+                    .append("  <tbody>\n");
+
+            List<Medicamento> consultaList = consultaJpaController.findMedicamentoEntities();
+
+            if (consultaList != null) {
+                for (Medicamento M : consultaList) {
+                    
+                    // Badge para el estado (Verde/Rojo)
+                    String estadoBadge = M.isActivo()
+                            ? "<span class='badge bg-success bg-opacity-10 text-success border border-success px-3 rounded-pill'>Activo</span>"
+                            : "<span class='badge bg-danger bg-opacity-10 text-danger border border-danger px-3 rounded-pill'>Inactivo</span>";
+
+                    // Badge para Stock bajo (Opcional visual enhancement)
+                    String stockClass = (M.getCantidadExistencias() < 10) ? "text-danger fw-bold" : "fw-bold";
+
+                    html.append("  <tr>\n")
+                            .append("      <td class='align-middle'>").append(M.getNombre()).append("</td>\n")
+                            .append("      <td class='align-middle text-muted small'>").append(M.getDescripcion()).append("</td>\n")
+                            .append("      <td class='align-middle text-center'>").append(formatoFecha.format(M.getFechaIngreso())).append("</td>\n")
+                            .append("      <td class='align-middle text-center ").append(stockClass).append("'>").append(M.getCantidadExistencias()).append("</td>\n")
+                            .append("      <td class='align-middle text-center'>").append(estadoBadge).append("</td>\n")
+                            .append("  </tr>\n");
+                }
+            }
+
+            html.append("  </tbody>\n</table>");
+
+            json.put("resultado", "exito");
+            json.put("tabla", html.toString());
+
+            array.put(json);
+
+            response.getWriter().write(array.toString());
+            break;
+        }
+        default:
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Opción no válida");
+    }
+}
 
     /**
      * Returns a short description of the servlet.

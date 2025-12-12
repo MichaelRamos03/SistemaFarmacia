@@ -14,6 +14,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import static java.lang.System.out;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -90,7 +91,6 @@ public class categoriaServelet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        
         request.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
@@ -156,57 +156,95 @@ public class categoriaServelet extends HttpServlet {
             break;
 
             case "consultar": {
-                categoriaJpaControler categoriaJpaControl = new categoriaJpaControler(); //emf
-                
-                String html = "<table class=\"table\" id=\"tabla_categoria\""
-                        + "class=\"table table-bordered dt-responsive nowrap\" width=\"100%\">\n"
-                        + "  <thead>\n"
-                        + "    <tr>\n"
-                        + "      <th scope=\"col\">#</th>\n"
-                        + "      <th scope=\"col\">Nombre Categoria;</th>\n"
-                        + "      <th scope=\"col\">Descripcion:</th>\n"
-                        + "      <th scope=\"col\">estado:</th>\n"
-                        + "      <th scope=\"col\">Acciones</th>\n"
-                        + "    </tr>\n"
-                        + "  </thead>\n"
-                        + "  <tbody>";
-                this.categoriaList = categoriaJpaControl.findCategoriaActivas(); 
-                int cont = 0;
+                categoriaJpaControler categoriaJpaControl = new categoriaJpaControler();
 
-                int i = 1;
-                for (Categoria obj : this.categoriaList) {
+                // Encabezados Estilo Bootstrap 5
+                StringBuilder html = new StringBuilder();
+                html.append("<table id=\"tabla_categoria\" class=\"table table-hover table-bordered nowrap\" style=\"width:100%\">\n");
+                html.append("  <thead class=\"bg-light\">\n");
+                html.append("    <tr>\n");
+                html.append("      <th scope=\"col\">#</th>\n");
+                html.append("      <th scope=\"col\">Nombre Categoría</th>\n");
+                html.append("      <th scope=\"col\">Descripción</th>\n");
+                html.append("      <th scope=\"col\" class=\"text-center\">Estado</th>\n");
+                html.append("      <th scope=\"col\" class=\"text-center\">Acciones</th>\n");
+                html.append("    </tr>\n");
+                html.append("  </thead>\n");
+                html.append("  <tbody>");
 
-                    cont++;
-                    html += "  <tr>\n"
-                            + "      <td>" + i + "</td>\n"
-                            + "      <td>" + obj.getNombreCategoria() + "</td>\n"
-                            + "      <td>" + obj.getDescripcion() + "</td>\n"
-                            + "      <td>" + (obj.isEstado() ? "Activo" : "Inactivo") + "</td>\n"
-                            + "<td>"
-                            + "<div class='dropdown m-b-10'>"
-                            + "<button class='btn btn-secondary dropdown-toggle'"
-                            + " type='button' id='dropdownMenuButton' data-toggle='dropdown'  aria-haspopup='true'"
-                            + "aria-expanded='false'> Seleccione</button>"
-                            + "<div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>"
-                            + (obj.isEstado()
-                            ? "<a class='dropdown-item btn_eliminar' data-id='" + obj.getIdCategoria() + "' href='javascript:void(0)'>Eliminar</a>"
-                            : "<a class='dropdown-item btn_activar' data-id='" + obj.getIdCategoria() + "' href='javascript:void(0)'>Activar</a>")
-                            + "<a class='dropdown-item btn_editar' data-id='" + obj.getIdCategoria() + "' href='javascript:void(0)'>Actualizar</a>"
-                            + "</div>"
-                            + "</div>"
-                            + "</td>"
-                            + " </tr>";
-                    i++;
+                try {
+                    this.categoriaList = categoriaJpaControl.findCategoriaActivas();
+                } catch (Exception e) {
+                    this.categoriaList = new ArrayList<>();
                 }
-                html += "  </tbody>\n"
-                        + "</table>";
+
+                int cont = 0;
+                int i = 1;
+
+                if (this.categoriaList != null) {
+                    for (Categoria obj : this.categoriaList) {
+                        cont++;
+
+                        // Badge de Estado Moderno (Verde/Rojo)
+                        String estadoBadge = obj.isEstado()
+                                ? "<span class='badge bg-success bg-opacity-10 text-success px-3 rounded-pill'>Activo</span>"
+                                : "<span class='badge bg-danger bg-opacity-10 text-danger px-3 rounded-pill'>Inactivo</span>";
+
+                        // Icono con la inicial
+                        String nombre = obj.getNombreCategoria();
+                        String inicial = (nombre != null && !nombre.isEmpty()) ? nombre.substring(0, 1).toUpperCase() : "?";
+
+                        html.append("  <tr>\n");
+                        html.append("      <td class='align-middle fw-bold'>").append(i).append("</td>\n");
+                        html.append("      <td class='align-middle'>\n");
+                        html.append("         <div class='d-flex align-items-center'>\n");
+                        html.append("            <div class='rounded-circle bg-purple-light text-purple d-flex justify-content-center align-items-center me-2' style='width:35px; height:35px; font-weight:bold;'>").append(inicial).append("</div>\n");
+                        html.append("            <div>").append(nombre).append("</div>\n");
+                        html.append("         </div>\n");
+                        html.append("      </td>\n");
+                        html.append("      <td class='align-middle text-muted'>").append(obj.getDescripcion()).append("</td>\n");
+                        html.append("      <td class='align-middle text-center'>").append(estadoBadge).append("</td>\n");
+
+                        // --- BOTONES DE ACCIÓN (ESTILO USUARIO) ---
+                        html.append("      <td class='align-middle text-center'>\n");
+                        html.append("        <div class='d-flex justify-content-center gap-2'>\n");
+
+                        // Botón Editar (Morado)
+                        html.append("          <button class='btn btn-sm btn-outline-purple btn_editar' data-id='").append(obj.getIdCategoria()).append("' title='Editar'>\n");
+                        html.append("            <i class='bi bi-pencil-fill'></i>\n");
+                        html.append("          </button>\n");
+
+                        // Botón Eliminar / Reactivar
+                        if (obj.isEstado()) {
+                            html.append("          <button class='btn btn-sm btn-outline-danger btn_eliminar' data-id='").append(obj.getIdCategoria()).append("' title='Desactivar'>\n");
+                            html.append("            <i class='bi bi-trash-fill'></i>\n");
+                            html.append("          </button>\n");
+                        } else {
+                            html.append("          <button class='btn btn-sm btn-outline-success btn_activar' data-id='").append(obj.getIdCategoria()).append("' title='Reactivar'>\n");
+                            html.append("            <i class='bi bi-arrow-counterclockwise'></i>\n");
+                            html.append("          </button>\n");
+                        }
+
+                        html.append("        </div>\n");
+                        html.append("      </td>\n");
+                        // ------------------------------------------------
+
+                        html.append("  </tr>");
+                        i++;
+                    }
+                }
+
+                html.append("  </tbody>\n");
+                html.append("</table>");
+
                 this.json.put("resultado", "exito");
-                this.json.put("tabla", html);
+                this.json.put("tabla", html.toString());
                 this.json.put("cantidad", cont);
+
                 this.array.put(this.json);
                 response.getWriter().write(array.toString());
+                break;
             }
-            break;
 
             case "editar_consultar": {
                 JSONObject CategoriaJsonObject = new JSONObject();

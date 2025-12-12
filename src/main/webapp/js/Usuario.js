@@ -3,37 +3,44 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/JavaScript.js to edit this template
  */
 
-
 const btnAddUsuario = document.querySelector("#registrar_usuario");
 const formularioUsuario = document.querySelector("#formulario_usuario");
 const comboRol = document.querySelector("#nombreRol");
 const title = document.querySelector("#exampleModalLabel");
 const error = document.querySelector("#error");
+
 document.addEventListener("DOMContentLoaded", () => {
     cargarCombos();
     cargarDatos();
 
+    // Select2 con tema Bootstrap 5
     $('#nombreRol').select2({
-        dropdownParent: $('#md_registrar_usuario')
+        dropdownParent: $('#md_registrar_usuario'),
+        theme: 'bootstrap-5',
+        width: '100%'
     });
+
     $('#formulario_usuario').parsley();
 });
 
-// PARA CARGAR EL MODAL QUE PERMITE REGISTRAR EL USUARIO
+// ABRIR MODAL REGISTRO
 btnAddUsuario.addEventListener('click', () => {
     formularioUsuario.reset();
     $('#formulario_usuario').parsley().reset();
     $('#nombreRol').val("").trigger('change');
-    title.innerHTML = "<h5 class='modal-title'\n\
- id='exampleModalLabel'>Registro nuevo Usuario\n\
-<br><sub> Todos los campos son obligatorios</sub>";
-    $("#md_registrar_usuario").modal("show");
-    console.log("entró a cargar modal ");
-    $("#idUsuario").hide(); // ESTE SE OCULTA PORQUE SE GENERA DE FORMA AUTOMÁTICA
-    $("#labelIdUsuario").hide(); // ESTE SE OCULTA PORQUE SE GENERA DE FORMA AUTOMÁTICA
+    
+    // Titulo dinámico con Icono
+    title.innerHTML = '<i class="bi bi-person-plus-fill"></i> Registro Nuevo Usuario';
+    
+    // Usamos la API de Bootstrap 5 para mostrar modal
+    const myModal = new bootstrap.Modal(document.getElementById('md_registrar_usuario'));
+    myModal.show();
+    
+    $("#divIdUsuario").hide(); // Ocultamos el div contenedor del ID
 });
+
 const cargarCombos = () => {
-    var datos = {"opcion": "cargarCombos"};
+    var datos = { "opcion": "cargarCombos" };
     $.ajax({
         dataType: "json",
         method: "POST",
@@ -42,18 +49,17 @@ const cargarCombos = () => {
     }).done(function (json) {
         if (json[0].resultado === "exito") {
             comboRol.innerHTML += json[0].roles;
-            console.log(json[0].roles);
         } else {
             console.log("error roles");
         }
     }).fail(function () {
+        console.log("Error al cargar combos");
     });
 };
 
 const cargarDatos = () => {
-    mostrar_cargando("Procesando Solicitud",
-            "Espere un momento mientras se obtiene la información solicitada");
-    const datos = {"opcion": "consultar"};
+    // Spinner de carga manual si se desea
+    const datos = { "opcion": "consultar" };
     $.ajax({
         dataType: "json",
         method: "POST",
@@ -62,40 +68,39 @@ const cargarDatos = () => {
     }).done(function (json) {
         if (json[0].resultado === "exito") {
             $("#tablita").empty().html(json[0].tabla);
+            
+            // Inicializar DataTables con diseño Bootstrap 5
             $("#tabla_usuarios").DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"
-                }
+                responsive: true,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
+                },
+                dom: '<"d-flex justify-content-between align-items-center mb-3"lf>rt<"d-flex justify-content-between align-items-center mt-3"ip>'
             });
-            document.querySelector("#usuarios_registrados").textContent
-                    = json[0].cantidad;
+
+            document.querySelector("#usuarios_registrados").textContent = json[0].cantidad;
         } else {
-            Swal.fire(
-                    "Error",
-                    "No se pudo completar la petición, intentelo más tarde",
-                    "error"
-                    );
+            Swal.fire("Error", "No se pudo cargar la tabla", "error");
         }
     }).fail(function () {
+        console.log("Error en petición consultar");
     });
 };
 
-
-
-/// PARA INSERTAR DATOS
-formularioUsuario.addEventListener("submit", (e) => {
+// INSERTAR O EDITAR
+$(document).on("submit", "#formulario_usuario", function (e) {
     e.preventDefault();
-    if (!$('#nombreRol').parsley().isValid() ||
-            !$('#nombreRol').parsley().isValid()
-            ) {
-        e.preventDefault();
+    
+    // Validación manual de Parsley
+    const formInstance = $(this).parsley();
+    if (!formInstance.isValid()) {
         return;
     }
-    const datos = $("#formulario_usuario").serialize();
-    console.log("DATOS A INSERTAR/MODIFICAR " + datos);
-    console.log("document.querySelector opcion.value"
-            + document.querySelector("#opcion").value);
-    if (document.querySelector("#opcion").value === "insertar") { //INSERTAR         
+
+    const datos = $(this).serialize();
+    const opcion = document.querySelector("#opcion").value;
+
+    if (opcion === "insertar") {
         $.ajax({
             dataType: "json",
             method: "POST",
@@ -105,31 +110,21 @@ formularioUsuario.addEventListener("submit", (e) => {
             if (json[0].resultado === "exito") {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Usuario Registrado',
+                    title: '¡Registrado!',
+                    text: 'Usuario creado correctamente',
                     showConfirmButton: false,
                     timer: 1500
                 });
                 formularioUsuario.reset();
-                $("#md_registrar_usuario").modal("hide");
-                setTimeout(() => {
-                    cargarDatos();
-                }, 1500);
+                $('#md_registrar_usuario').modal('hide'); // Cerrar modal BS5
+                $('.modal-backdrop').remove(); // Limpiar backdrop por si acaso
+                cargarDatos();
             } else {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'No se logró insertar el registro',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+                Swal.fire('Error', 'No se pudo registrar (quizás ya existe)', 'error');
             }
-        }).fail(function () {
         });
 
-
-
-// modificar
-
-    } else {
+    } else { // ACTUALIZAR
         $.ajax({
             dataType: "json",
             method: "POST",
@@ -140,61 +135,36 @@ formularioUsuario.addEventListener("submit", (e) => {
                 $("#opcion").val("insertar");
                 Swal.fire({
                     icon: 'success',
-                    title: 'Usuario Actualizado',
+                    title: 'Actualizado',
+                    text: 'Usuario modificado correctamente',
                     showConfirmButton: false,
                     timer: 1500
                 });
                 formularioUsuario.reset();
-                $("#md_registrar_usuario").modal("hide");
-                setTimeout(() => {
-                    cargarDatos();
-                }, 1500);
+                $('#md_registrar_usuario').modal('hide');
+                $('.modal-backdrop').remove();
+                cargarDatos();
             } else {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'No se logró actualizar el registro',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+                Swal.fire('Error', 'No se pudo actualizar', 'error');
             }
-        }).fail(function () {
         });
-
     }
 });
 
-
-
-function mostrar_cargando(titulo, mensaje = "") {
-    Swal.fire({
-        title: titulo,
-        html: mensaje,
-        timer: 2000,
-        timerProgressBar: true,
-        didOpen: () => {
-            Swal.showLoading();
-        },
-        willClose: () => {
-        }
-    }).then((result) => {
-        if (result.dismiss === Swal.DismissReason.timer) {
-        }
-    });
-}
-
-
-
-
-
-
+// ABRIR MODAL EDITAR
 document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("btn_editar")) {
-        $("#idUsuario").show();
-        $("#labelIdUsuario").show();
+    // Delegación de eventos para elementos dinámicos
+    if (e.target.closest(".btn_editar")) {
+        const btn = e.target.closest(".btn_editar");
+        const id = btn.getAttribute("data-id");
+        
+        $("#divIdUsuario").show(); // Mostrar campo ID
         $('#formulario_usuario').parsley().reset();
-        title.innerHTML = "<h5 class='modal-title' id='exampleModalLabel'>Editar Usuario<br><sub> Todos los campos son obligatorios</sub>";
-        const id = e.target.getAttribute("data-id");
-        var datos = {"opcion": "editar_consultar", "idUsuario": id};
+        
+        title.innerHTML = '<i class="bi bi-pencil-square"></i> Editar Usuario';
+        
+        var datos = { "opcion": "editar_consultar", "idUsuario": id };
+        
         $.ajax({
             dataType: "json",
             method: "POST",
@@ -204,138 +174,116 @@ document.addEventListener("click", (e) => {
             if (json[0].resultado === "exito") {
                 document.querySelector("#idUsuario").value = json[0].usuario.idUsuario;
                 document.querySelector("#Usuario").value = json[0].usuario.Usuario;
-                document.querySelector("#nombreRol").value = json[0].usuario.nombreRol;
                 document.querySelector("#contrasenia").value = json[0].usuario.contrasenia;
-                document.querySelector(`input[name="estado"][value="${json[0].usuario.estado}"]`).checked = true;
+                
+                // Setear Radio Button
+                const estadoVal = json[0].usuario.estado === "activo" ? "activo" : "inactivo";
+                $(`input[name="estado"][value="${estadoVal}"]`).prop("checked", true);
 
-            document.querySelector("#idUsuario").readOnly = true;
+                // Setear Select2
                 $('#nombreRol').val(json[0].usuario.nombreRol).trigger('change');
-                $("#md_registrar_usuario").modal("show");
+                
                 $("#opcion").val("actualizar");
+                
+                // Abrir Modal BS5
+                const myModal = new bootstrap.Modal(document.getElementById('md_registrar_usuario'));
+                myModal.show();
+                
             } else {
-                Swal.fire(
-                        "Error",
-                        "No se pudo completar la petición, intentelo más tarde",
-                        "error"
-                        );
+                Swal.fire("Error", "No se encontraron datos", "error");
             }
-        }).fail(function () {
-        }).always(function () {
         });
     }
-
-
-
-
 });
-      $(document).on("click", ".btn_eliminar", function (e) {
-        e.preventDefault();
-        Swal.fire({
-            title: '¿Desea eliminar el registro?',
-            text: 'Al continuar, no podrá ser revertido y los datos serán borrados completamente',
-            showDenyButton: true,
-            showCancelButton: false,
-            confirmButton: 'si',
-            denyButton: 'NO'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                eliminar($(this).attr('data-id'));
-            } else if (result.isDenied) {
-                Swal.fire("Opcion cancelada por el usuario", '', 'info');
-            }
-        });
+
+// ELIMINAR
+$(document).on("click", ".btn_eliminar", function (e) {
+    e.preventDefault();
+    const id = $(this).data('id');
+    
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "El usuario pasará a estado inactivo.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            eliminar(id);
+        }
     });
-
-
-
-
-
+});
 
 function eliminar(id) {
-     mostrar_cargando("Procesando solicitud", "Espere mientras se eliminan los datos " + id);
-    var datos = {"opcion": "eliminar", "idUsuario": id};
-    console.log("id a eliminar es: " + id);
+    var datos = { "opcion": "eliminar", "idUsuario": id };
     $.ajax({
         dataType: "json",
         method: "POST",
         url: "usuarioServlt",
         data: datos
     }).done(function (json) {
-        Swal.close();
         if (json[0].resultado === "exito") {
-            Swal.fire(
-                    'Excelente',
-                    'El dato fue eliminado',
-                    'success'
-                    );
+            Swal.fire('Eliminado', 'El usuario ha sido desactivado.', 'success');
             cargarDatos();
         } else {
-            Swal.fire(
-                    'Error',
-                    'No se pudo eliminar el dato intentelo más tarde',
-                    'error'
-                    );
+            Swal.fire('Error', 'No se pudo eliminar', 'error');
         }
-    }).fail(function () {
-        console.log("Error al eliminar");
-    }).always(function () {
-        console.log("Error al eliminar");
     });
 }
 
+// MOSTRAR INACTIVOS (Toggle)
 $(document).ready(function () {
-  
     $("#mostrar_inactivas").on("click", function () {
         const contenedor = $("#contenedor_inactivas");
-        contenedor.slideToggle();
+        contenedor.slideToggle(); // Animación suave
 
-        if (contenedor.is(":visible")) {
+        if (contenedor.is(":visible") || contenedor.css('display') !== 'none') {
             $.ajax({
                 method: "POST",
                 url: "usuarioServlt",
-                data: { opcion: "listar_inactivas" }, 
+                data: { opcion: "listar_inactivas" },
                 dataType: "json"
             }).done(function (data) {
                 const lista = $("#lista_usuarios_inactivas");
                 lista.empty();
 
                 if (data.length === 0) {
-                    lista.append("<p>No hay categorías inactivas.</p>");
+                    lista.append('<div class="text-center text-muted py-3"><i class="bi bi-emoji-smile"></i> No hay usuarios inactivos.</div>');
                 } else {
-                    data.forEach(cat => {
+                    data.forEach(user => {
+                        // Renderizado HTML limpio con clases Bootstrap
                         lista.append(`
-                            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <div class="d-flex justify-content-between align-items-center bg-white p-3 mb-2 rounded shadow-sm border-start border-4 border-danger">
                                 <div>
-                                    <strong>${cat.Usuario}</strong><br>
-                                    <small>${cat.contrasenia}</small>
+                                    <div class="fw-bold text-dark">${user.Usuario}</div>
+                                    <div class="small text-muted text-truncate" style="max-width: 150px;">Clave: ${user.contrasenia}</div>
                                 </div>
-                                <button class="btn btn-su${cat.Usuario}</strong><br>
-                                    <small>${cat.contrasenia}</ccess btn-sm reactivar-usuario" data-id="${cat.idUsuario}">
-                                    Reactivar
+                                <button class="btn btn-outline-success btn-sm reactivar-usuario px-3" data-id="${user.idUsuario}">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reactivar
                                 </button>
                             </div>
                         `);
                     });
                 }
-            }).fail(() => {
-                $("#lista_usuarios_inactivas").html("<p>Error al cargar los usuarios inactivos.</p>");
             });
         }
     });
-
-   
 });
 
+// REACTIVAR
 $(document).on("click", ".reactivar-usuario", function (e) {
     e.preventDefault();
-
     const idUsuario = $(this).data("id");
 
     Swal.fire({
-        title: "¿Reactivar usuario?",
-        text: "Esta acción reactivará el usuario seleccionado.",
-        icon: "warning",
+        title: "¿Reactivar Cuenta?",
+        text: "El usuario volverá a tener acceso al sistema.",
+        icon: "question",
         showCancelButton: true,
+        confirmButtonColor: '#28a745',
         confirmButtonText: "Sí, reactivar",
         cancelButtonText: "Cancelar",
     }).then((result) => {
@@ -343,36 +291,25 @@ $(document).on("click", ".reactivar-usuario", function (e) {
             $.ajax({
                 url: "usuarioServlt",
                 method: "POST",
+                dataType: "json",
                 data: {
                     opcion: "reactivar",
                     idUsuario: idUsuario
                 },
                 success: function (response) {
-                    if (response[0]?.resultado === "exito") {
-                        Swal.fire({
-                            icon: "success",
-                            title: "Reactivado",
-                            text: "El usuario fue reactivado exitosamente",
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1600);
-
+                    // El response viene como array según tu servlet [json]
+                    if (response[0] && response[0].resultado === "exito") {
+                        Swal.fire("Reactivado", "Usuario activo nuevamente", "success");
+                        cargarDatos(); // Recargar tabla principal
+                        $("#mostrar_inactivas").click(); // Cerrar o refrescar lista inactivos
                     } else {
-                        Swal.fire("Error", "No se pudo reactivar el usuario", "error");
+                        Swal.fire("Error", "No se pudo reactivar", "error");
                     }
-                },
-                error: function () {
-                    Swal.fire("Error", "Error en la petición AJAX", "error");
                 }
             });
         }
     });
 });
-
 
 
 

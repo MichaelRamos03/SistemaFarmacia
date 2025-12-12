@@ -1,257 +1,206 @@
-/* * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/JavaScript.js to edit this template
+/* * Funciones JS para Ventas - Diseño Farmacia
  */
 
-const btnAddPersona = document.querySelector("#registrar_Venta");
 const formularioVenta = document.querySelector("#formulario_Venta");
-const combo = document.querySelector("#id");
 const title = document.querySelector("#exampleModalLabel");
-const error = document.querySelector("#error");
 
 document.addEventListener("DOMContentLoaded", () => {
     cargarCombos();
     cargarDatos();
-
-    $('#id').select2({
-        dropdownParent: $('#md_registrar_Venta')
-    });
     $('#formulario_Venta').parsley();
 });
 
-// PARA CARGAR EL MODAL QUE PERMITE REGISTRAR LA VENTA
-btnAddPersona.addEventListener('click', () => {
+// ABRIR MODAL
+$("#registrar_Venta").on('click', function() {
     formularioVenta.reset();
     $('#formulario_Venta').parsley().reset();
     $('#id').val("").trigger('change');
-    title.innerHTML = "<h5 class='modal-title' id='exampleModalLabel'>Registro nueva Venta<br><sub> Todos los campos son obligatorios</sub>";
+    
+    // Cambiar título con Icono
+    $("#exampleModalLabel").html("<i class='bi bi-cart-plus-fill'></i> Registro Nueva Venta");
+    
     $("#md_registrar_Venta").modal("show");
-    console.log("entró a cargar modal ");
-    $("#idVenta").hide(); 
-    $("#labelVenta").hide(); 
+    $("#grupoIdVenta").hide(); 
+    $("#opcion").val("insertar");
 });
 
 const cargarCombos = () => {
-    var datos = {"opcion": "cargarCombos"};
-    console.log(datos);
-
     $.ajax({
         dataType: "json",
         method: "POST",
         url: "ventaServlet",
-        data: datos
+        data: {"opcion": "cargarCombos"}
     }).done(function (json) {
         if (json[0].resultado === "exito") {
-            combo.innerHTML += json[0].persona;
-            console.log(json[0].persona);
-        } else {
-            console.log("error al cargar combos");
+            $("#id").html(json[0].persona);
         }
-    }).fail(function () {
     });
 };
 
 const cargarDatos = () => {
-    mostrar_cargando("Procesando Solicitud", "Espere un momento mientras se obtiene la información solicitada");
-    const datos = {"opcion": "consultar"};
     $.ajax({
         dataType: "json",
         method: "POST",
         url: "ventaServlet",
-        data: datos
+        data: {"opcion": "consultar"}
     }).done(function (json) {
         if (json[0].resultado === "exito") {
             $("#tablita").empty().html(json[0].tabla);
-
+            
+            // Inicializar DataTables BS5
             $("#tabla_venta").DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"
-                }
+                "language": { "url": "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json" },
+                "responsive": true,
+                "autoWidth": false
             });
-            document.querySelector("#venta_registradas").textContent = json[0].cantidad;
+            $("#venta_registradas").text(json[0].cantidad);
         } else {
-            Swal.fire("Error", "No se pudo completar la petición, inténtelo más tarde", "error");
+            Swal.fire("Error", "No se pudo cargar la tabla", "error");
         }
-    }).fail(function () {
     });
 };
 
-/// PARA INSERTAR O EDITAR DATOS
+// SUBMIT FORMULARIO
 formularioVenta.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (!$('#id').parsley().isValid()) {
-        e.preventDefault();
-        return;
-    }
+    if (!$('#formulario_Venta').parsley().isValid()) return;
+
     const datos = $("#formulario_Venta").serialize();
-    console.log("DATOS A INSERTAR/MODIFICAR " + datos);
-    
-    // --- INSERTAR NUEVA VENTA ---
-    if (document.querySelector("#opcion").value === "insertar") { 
-        $.ajax({
-            dataType: "json",
-            method: "POST",
-            url: "ventaServlet",
-            data: datos
-        }).done(function (json) {
-            if (json[0].resultado === "exito") {
-                const idVenta = json[0].idVenta;
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Venta Registrada',
-                    text: 'Redirigiendo a agregar productos...',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-                
-                formularioVenta.reset();
-                $("#md_registrar_Venta").modal("hide");
+    const opcion = $("#opcion").val();
 
-                setTimeout(() => {
-                    // === AQUÍ ESTÁ LA CORRECCIÓN ===
-                    // Redirige a la pantalla de detalles pasando el ID de la venta
-                    window.location.href = "detalleVenta.jsp?idVenta=" + idVenta;
-                }, 1500);
-
-            } else {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'No se logró insertar el registro',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            }
-        }).fail(function () {
-        });
-
-    // --- MODIFICAR VENTA ---
-    } else {
-        $.ajax({
-            dataType: "json",
-            method: "POST",
-            url: "ventaServlet",
-            data: datos
-        }).done(function (json) {
-            if (json[0].resultado === "exito") {
-                $("#opcion").val("insertar");
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Venta Actualizada',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-                formularioVenta.reset();
-                $("#md_registrar_Venta").modal("hide");
-                setTimeout(() => {
-                    cargarDatos();
-                }, 1500);
-            } else {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'No se logró actualizar el registro',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            }
-        }).fail(function () {
-        });
-    }
-});
-
-function mostrar_cargando(titulo, mensaje = "") {
-    Swal.fire({
-        title: titulo,
-        html: mensaje,
-        timer: 2000,
-        timerProgressBar: true,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-}
-
-document.addEventListener("click", (e) => {
-    // BOTÓN EDITAR
-    if (e.target.classList.contains("btn_editar")) {
-        $("#idVenta").show();
-        $("#labelVenta").show();
-        $('#formulario_Venta').parsley().reset();
-        title.innerHTML = "<h5 class='modal-title' id='exampleModalLabel'>Editar Venta<br><sub> Todos los campos son obligatorios</sub>";
-        const id = e.target.getAttribute("data-id");
-        var datos = {"opcion": "editar_consultar", "idVenta": id};
-        $.ajax({
-            dataType: "json",
-            method: "POST",
-            url: "ventaServlet",
-            data: datos
-        }).done(function (json) {
-            if (json[0].resultado === "exito") {
-                document.querySelector("#idVenta").value = json[0].venta.idVenta;
-                document.querySelector("#fechaVenta").value = json[0].venta.fechaVenta;
-                document.querySelector("#id").readOnly = true;
-                $('#id').val(json[0].venta.id).trigger('change');
-                $("#md_registrar_Venta").modal("show");
-                $("#opcion").val("si_actualizalo");
-            } else {
-                Swal.fire("Error", "No se pudo completar la petición", "error");
-            }
-        }).fail(function () {});
-    }
-
-    // BOTÓN ELIMINAR
-    if (e.target.classList.contains("btn_eliminar")) {
-        e.preventDefault();
-        const idEliminar = e.target.getAttribute("data-id"); 
-        
-        Swal.fire({
-            title: '¿Desea eliminar el registro?',
-            text: 'Al continuar, no podrá ser revertido',
-            showDenyButton: true,
-            confirmButtonText: 'Si',
-            denyButtonText: 'No'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                eliminar(idEliminar);
-            }
-        });
-    }
-});
-
-function eliminar(id) {
-    mostrar_cargando("Procesando solicitud", "Espere mientras se eliminan los datos " + id);
-    var datos = {"opcion": "eliminar", "idVenta": id};
     $.ajax({
         dataType: "json",
         method: "POST",
         url: "ventaServlet",
         data: datos
     }).done(function (json) {
-        Swal.close();
         if (json[0].resultado === "exito") {
-            Swal.fire('Excelente', 'El dato fue eliminado', 'success');
-            cargarDatos();
-        } else {
-            Swal.fire('Error', 'No se pudo eliminar el dato', 'error');
-        }
-    }).fail(function () {
-        console.log("Error al eliminar");
-    });
-}
+            Swal.fire({
+                icon: 'success',
+                title: (opcion === "insertar") ? 'Venta Registrada' : 'Venta Actualizada',
+                showConfirmButton: false,
+                timer: 1500
+            });
+            
+            $("#md_registrar_Venta").modal("hide");
 
-// =========================================================
-// FUNCIÓN PARA IMPRIMIR FACTURA (VISTA PREVIA)
-// =========================================================
-function imprimirFactura(idVenta, tipo) {
-    
-    // 1. Mostrar mensaje de carga
+            if (opcion === "insertar") {
+                setTimeout(() => {
+                    // Redirigir a detalles
+                    window.location.href = "detalleVenta.jsp?idVenta=" + json[0].idVenta;
+                }, 1500);
+            } else {
+                cargarDatos();
+            }
+        } else {
+            Swal.fire("Info", "No se pudo completar la operación", "info");
+        }
+    });
+});
+
+// BOTONES ACCIÓN (Delegación de eventos jQuery)
+$(document).on('click', '.btn_editar', function () {
+    let id = $(this).attr('data-id');
+    $("#grupoIdVenta").show();
+    $('#formulario_Venta').parsley().reset();
+    $("#exampleModalLabel").html("<i class='bi bi-pencil-square'></i> Editar Venta");
+    $("#opcion").val("si_actualizalo");
+
+    $.ajax({
+        dataType: "json",
+        method: "POST",
+        url: "ventaServlet",
+        data: {"opcion": "editar_consultar", "idVenta": id}
+    }).done(function (json) {
+        if (json[0].resultado === "exito") {
+            $("#idVenta").val(json[0].venta.idVenta);
+            $("#fechaVenta").val(json[0].venta.fechaVenta);
+            $('#id').val(json[0].venta.id).trigger('change');
+            $("#md_registrar_Venta").modal("show");
+        }
+    });
+});
+
+$(document).on('click', '.btn_eliminar', function () {
+    let id = $(this).attr('data-id');
     Swal.fire({
-        title: 'Generando Vista Previa',
-        text: 'Procesando documento ' + tipo.toUpperCase() + '...',
+        title: '¿Eliminar registro?',
+        text: "No se podrá revertir esta acción",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            eliminar(id);
+        }
+    });
+});
+
+function eliminar(id) {
+    // Mostramos cargando para que el usuario sepa que algo pasa
+    Swal.fire({
+        title: 'Procesando...',
+        text: 'Intentando eliminar el registro',
         allowOutsideClick: false,
         didOpen: () => { Swal.showLoading(); }
     });
 
-    // 2. Pedir la factura al Servlet
+    var datos = {"opcion": "eliminar", "idVenta": id};
+    
+    $.ajax({
+        dataType: "json",
+        method: "POST",
+        url: "ventaServlet",
+        data: datos
+    }).done(function (json) {
+        Swal.close(); // Cerramos el loading
+        
+        // Verificamos la respuesta del Servlet
+        if (json[0].resultado === "exito") {
+            Swal.fire(
+                '¡Eliminado!',
+                'La venta ha sido eliminada correctamente.',
+                'success'
+            );
+            cargarDatos(); // Recargamos la tabla
+            
+        } else if (json[0].resultado === "error_integridad") {
+            // MENSAJE ESPECÍFICO PARA TU PROBLEMA
+            Swal.fire(
+                'No se puede eliminar',
+                'Esta venta contiene productos/detalles asociados. <br>Debes eliminar los productos de la venta primero.',
+                'warning'
+            );
+        } else {
+            Swal.fire(
+                'Error',
+                'No se pudo eliminar el registro. Verifique que no tenga datos asociados.',
+                'error'
+            );
+        }
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+        Swal.close();
+        // Ahora si falla el servidor (Error 500), te avisará
+        console.error("Error servidor:", errorThrown);
+        Swal.fire(
+            'Error Crítico',
+            'Ocurrió un error de conexión con el servidor (Error 500). Revisa la consola.',
+            'error'
+        );
+    });
+}
+
+// IMPRIMIR FACTURA
+function imprimirFactura(idVenta, tipo) {
+    Swal.fire({
+        title: 'Generando Documento',
+        text: 'Procesando ' + tipo.toUpperCase() + '...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
     $.ajax({
         url: 'ventaServlet',
         data: {
@@ -261,31 +210,23 @@ function imprimirFactura(idVenta, tipo) {
         },
         type: 'POST',
         dataType: 'json',
-        success: function (data) {
+        success: function (response) {
             Swal.close();
-            
-            // Aseguramos que data sea el objeto correcto
-            var response = (Array.isArray(data)) ? data[0] : data;
+            // Validar si viene en array o objeto directo
+            var data = (Array.isArray(response)) ? response[0] : response;
 
-            if (response.resultado === "exito") {
-                // 3. Abrir ventana POPUP
+            if (data.resultado === "exito") {
                 var ventana = window.open('', 'VISTA_PREVIA', 'height=800,width=900,scrollbars=yes');
-                
-                // Escribir el HTML generado por el servidor
-                ventana.document.write(response.html);
-                ventana.document.close(); 
+                ventana.document.write(data.html);
+                ventana.document.close();
                 ventana.focus();
-                
-                // NOTA: Se eliminó el window.print() automático para que solo muestre la vista previa
-                
             } else {
-                Swal.fire('Error', response.mensaje || 'Error desconocido al generar factura', 'error');
+                Swal.fire('Error', data.mensaje || 'Error al generar', 'error');
             }
         },
-        error: function (jqXHR) {
+        error: function () {
             Swal.close();
-            Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
-            console.error(jqXHR.responseText);
+            Swal.fire('Error', 'Error de conexión', 'error');
         }
     });
 }

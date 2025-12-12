@@ -1,78 +1,139 @@
-/*
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
-*/
-/* 
-    Created on : 11 jun 2025, 9:50:37 a. m.
-    Author     : Gaby Laínez
-*/
+/* DISEÑO MENÚ - ESTILO FARMACIA PURPLE */
+
+:root {
+    --sidebar-bg: #5a2ca0;        /* Morado Principal */
+    --sidebar-bg-hover: #451d80;  /* Morado Oscuro para Hover */
+    --text-color: #ffffff;
+    --accent-color: #cd1ff8d8;    /* Acento Rosa/Lila */
+}
 
 body {
-    margin: 0;
-    font-family: 'Georgia', serif;
+    background-color: #f3f4f7;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden; /* Evita scroll horizontal al abrir menú */
+}
+
+/* --- SIDEBAR (BARRA LATERAL) --- */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -260px; /* Oculto por defecto */
+    width: 260px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--sidebar-bg) 0%, var(--sidebar-bg-hover) 100%);
+    color: var(--text-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding: 25px 20px;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header h3 {
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+/* --- ENLACES DEL MENÚ --- */
+.nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    padding: 15px 25px;
+    font-size: 1.05rem;
+    transition: all 0.2s ease-in-out;
     display: flex;
     align-items: center;
+    border-left: 4px solid transparent;
 }
 
-.sidebar {
-    width: 250px;
-    height: 100vh;
-    background: #5a2ca0; 
-    color: white;
-    padding: 32px;
-    position: fixed;
-    left: -250px; 
-    transition: left 0.3s ease-in-out;
-    top: 0;
+.nav-link i {
+    font-size: 1.3rem;
+    width: 35px; /* Para alinear texto */
+    text-align: center;
 }
 
-.sidebar ul {
-    list-style: none;
-    padding: 0;
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-left: 4px solid var(--accent-color);
+    transform: translateX(5px);
 }
 
-.sidebar ul li {
-    padding: 10px 0;
+/* Enlace activo (si quisieras marcarlo) */
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-left: 4px solid #fff;
 }
 
-.sidebar ul li a {
-    color: white;
-    text-decoration: none;
-    display: block;
-    padding: 10px;
+/* Botón Cerrar Sesión */
+.logout-link {
+    background-color: rgba(220, 53, 69, 0.1); /* Rojo suave */
+    color: #ffcccc !important;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.sidebar ul li a:hover {
-    background: #7a42c4;
+.logout-link:hover {
+    background-color: #dc3545; /* Rojo fuerte */
+    color: white !important;
+    border-left: 4px solid #b02a37;
 }
 
-body {
-    background-image: url('../img/Fondo.jpeg');
-    background-size: cover; 
-    background-position: center;
-    background-repeat: no-repeat; 
-    height: 100vh; 
+/* --- CONTENIDO PRINCIPAL --- */
+.content {
+    padding: 20px;
+    padding-top: 80px; /* Espacio para el botón toggle */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
 }
 
-
+/* --- BOTÓN HAMBURGUESA --- */
 #menu-toggle {
     position: fixed;
-    top: 0px;
-    left: -2px;
-    font-size: 29px;
-    cursor: pointer;
-    background: #cd1ff8d8;
+    top: 20px;
+    left: 20px;
+    background-color: var(--sidebar-bg);
     color: white;
     border: none;
-    padding: 14px 20px;
-    border-radius: 4px;
-    z-index: 1000; 
-    transition: left 0.3s ease-in-out;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    z-index: 1100; /* Encima del sidebar */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+#menu-toggle:hover {
+    transform: scale(1.1);
+    background-color: var(--sidebar-bg-hover);
+}
 
-.content {
-    flex: 1;
-    padding: 85px;
-    transition: margin-left 0.3s ease-in-out;
+/* Fondo de bienvenida */
+.card-welcome {
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #ffffff 0%, #f3f4f7 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decoración opcional de fondo */
+.bg-decoration {
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    font-size: 15rem;
+    color: rgba(90, 44, 160, 0.05); /* Logo gigante transparente */
+    z-index: 0;
+    pointer-events: none;
 }

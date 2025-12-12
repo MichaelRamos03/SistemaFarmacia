@@ -1,6 +1,5 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+ * Servlet Persona - Corregido error de JSON duplicado y Diseño de Tabla
  */
 package com.ues.edu.controller;
 
@@ -27,71 +26,16 @@ import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-/**
- *
- * @author Gaby Laínez
- */
 @WebServlet(name = "PersonaServlet", urlPatterns = {"/PersonaServlet"})
 public class PersonaServlet extends HttpServlet {
 
-    private List<Usuario> usuariList;
-    private List<Persona> personaList;
-    private Usuario usuario;
-    private Persona persona;
-    private Persona personsRecuperada;
+    // Eliminamos json y array de aquí para evitar conflictos de memoria
 
-    private JSONArray array = new JSONArray();
-    private JSONObject json = new JSONObject();
-
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet PersonaServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet PersonaServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -99,214 +43,204 @@ public class PersonaServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+        
         String op = request.getParameter("opcion");
-        System.out.println("OPCION EN doPost " + op);
+        
+        // CORRECCIÓN CLAVE: Inicializar aquí para que estén limpios en cada petición
+        JSONObject json = new JSONObject();
+        JSONArray array = new JSONArray();
+
         switch (op) {
             case "cargarCombos": {
                 String comboUsuario = "";
+                UsuarioJpaControler usuarioJpaControl = new UsuarioJpaControler();
+                List<Usuario> usuariList = usuarioJpaControl.findUsuarioEntities();
 
-                UsuarioJpaControler usuarioJpaControl = new UsuarioJpaControler(); // llamada al emf
-
-                this.usuariList = new ArrayList<>();
-                this.usuariList = usuarioJpaControl.findUsuarioEntities();
-
-                if (!this.usuariList.isEmpty()) {
-                    for (Usuario usuario : this.usuariList) {
-                        comboUsuario += "<option value='" + usuario.getId() + "'>" + usuario.getUsuario() + "</option>";
+                if (usuariList != null && !usuariList.isEmpty()) {
+                    for (Usuario u : usuariList) {
+                        // Solo mostramos usuarios activos (opcional)
+                        if(u.isEstado()) {
+                            comboUsuario += "<option value='" + u.getId() + "'>" + u.getUsuario() + "</option>";
+                        }
                     }
-                    this.json.put("usuario", comboUsuario);
+                    json.put("usuario", comboUsuario);
+                    json.put("resultado", "exito");
+                } else {
+                    json.put("resultado", "error");
                 }
-                this.array.put(this.json);
-                response.getWriter().write(this.array.toString());
+                array.put(json);
+                response.getWriter().write(array.toString());
             }
             break;
 
             case "insertar": {
-
                 try {
-
                     String nombre = request.getParameter("nombre");
-
                     Date fechaNacimiento = Date.valueOf(request.getParameter("fechaNacimiento"));
+                    
+                    // Calculo de edad
                     LocalDate nacimiento = fechaNacimiento.toLocalDate();
                     LocalDate hoy = LocalDate.now();
                     int edad = Period.between(nacimiento, hoy).getYears();
 
                     int dui = Integer.parseInt(request.getParameter("dui"));
                     String telefono = request.getParameter("telefono");
-
                     int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
-                    this.usuario = new Usuario(idUsuario);
+                    
+                    Usuario usuario = new Usuario(idUsuario);
+                    Persona objPersona = new Persona(nombre, fechaNacimiento, edad, dui, telefono, usuario);
 
-                    Persona objPersona = new Persona(nombre, fechaNacimiento, edad, dui, telefono, this.usuario);
-
-                    PersonaJpaControler personaJpaControl = new PersonaJpaControler(); // emf
-
+                    PersonaJpaControler personaJpaControl = new PersonaJpaControler();
                     String resultado = personaJpaControl.create(objPersona);
+                    
                     json.put("resultado", resultado);
-
                 } catch (Exception e) {
                     json.put("resultado", "error_exception");
                     e.printStackTrace();
                 }
-                this.array.put(this.json);
+                array.put(json);
                 response.getWriter().write(array.toString());
             }
             break;
 
             case "si_actualizalo": {
-                try // Cuando modifica.
-                {
+                try {
                     int idPersona = Integer.parseInt(request.getParameter("idPersona"));
                     String nombre = request.getParameter("nombre");
                     Date fechaNacimiento = Date.valueOf(request.getParameter("fechaNacimiento"));
-                    //Recalculando Edad
+                    
                     LocalDate nacimiento = fechaNacimiento.toLocalDate();
                     LocalDate hoy = LocalDate.now();
                     int edad = Period.between(nacimiento, hoy).getYears();
 
                     int dui = Integer.parseInt(request.getParameter("dui"));
                     String telefono = request.getParameter("telefono");
-
                     int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
-                    this.usuario = new Usuario(idUsuario);
+                    
+                    Usuario usuario = new Usuario(idUsuario);
+                    Persona objPersona = new Persona(idPersona, nombre, fechaNacimiento, edad, dui, telefono, usuario);
 
-                    Persona objPersona = new Persona(idPersona, nombre, fechaNacimiento, edad, dui, telefono, this.usuario);
-
-                    PersonaJpaControler personaJpaControl = new PersonaJpaControler(); // emf
-
+                    PersonaJpaControler personaJpaControl = new PersonaJpaControler();
                     String actualizar = personaJpaControl.edit(objPersona);
-                    if (actualizar.equals("exito")) {
-                        this.json.put("resultado", "exito");
-                    } else {
-                        this.json.put("resultado", "error");
-                    }
-                    this.array.put(this.json);
-                    response.getWriter().write(this.array.toString());
+                    
+                    json.put("resultado", actualizar.equals("exito") ? "exito" : "error");
                 } catch (Exception ex) {
-                    Logger.getLogger(PersonaServlet.class.getName())
-                            .log(Level.SEVERE, null, ex);
+                    json.put("resultado", "error");
+                    ex.printStackTrace();
                 }
+                array.put(json);
+                response.getWriter().write(array.toString());
             }
             break;
 
             case "consultar": {
-
-                PersonaJpaControler personaJpaControl = new PersonaJpaControler(); //emf
-                String html = "<table class=\"table\" id=\"tabla_persona\""
-                        + "class=\"table table-bordered dt-responsive nowrap\" width=\"100%\">\n"
-                        + "  <thead>\n"
+                PersonaJpaControler personaJpaControl = new PersonaJpaControler();
+                
+                // Diseño de Tabla alineado con Ventas/Usuarios
+                String html = "<table id=\"tabla_persona\" class=\"table table-hover table-bordered nowrap align-middle\" style=\"width:100%\">\n"
+                        + "  <thead class=\"bg-light\">\n"
                         + "    <tr>\n"
                         + "      <th scope=\"col\">#</th>\n"
-                        + "      <th scope=\"col\">Usuario:</th>\n"
-                        + "      <th scope=\"col\">Nombre:</th>\n"
-                        + "      <th scope=\"col\">Edad:</th>\n"
-                        + "      <th scope=\"col\">Dui:</th>\n"
-                        + "      <th scope=\"col\">Telefono:</th>\n"
-                        + "      <th scope=\"col\">Acciones:</th>\n"
+                        + "      <th scope=\"col\">Nombre Empleado</th>\n"
+                        + "      <th scope=\"col\">Usuario Sistema</th>\n"
+                        + "      <th scope=\"col\">Edad</th>\n"
+                        + "      <th scope=\"col\">DUI</th>\n"
+                        + "      <th scope=\"col\">Teléfono</th>\n"
+                        + "      <th scope=\"col\" class=\"text-center\">Acciones</th>\n"
                         + "    </tr>\n"
                         + "  </thead>\n"
                         + "  <tbody>";
-                this.personaList = new ArrayList<>();
-                this.personaList = personaJpaControl.findPersonaEntities();
-                int cont = 0;
+
+                List<Persona> personaList = personaJpaControl.findPersonaEntities();
                 int i = 1;
 
-                for (Persona objPersona : this.personaList) {
-                    cont++;
-                    html += "  <tr>\n"
-                            + "      <td>" + i + "</td>\n"
-                            + "      <td>" + objPersona.getUsuario().getUsuario() + "</td>\n"
-                            + "      <td>" + objPersona.getNombrePersona() + "</td>\n"
-                            + "      <td>" + objPersona.getEdad() + "</td>\n"
-                            + "      <td>" + objPersona.getDui() + "</td>\n"
-                            + "      <td>" + objPersona.getTelefono() + "</td>\n"
-                            + "<td>"
-                            + "<div class='dropdown m-b-10'>"
-                            + "<button class='btn btn-secondary dropdown-toggle'"
-                            + " type='button' id='dropdownMenuButton' data-toggle='dropdown'  aria-haspopup='true'"
-                            + "aria-expanded='false'> Seleccione</button>"
-                            + "<div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>"
-                            + "<a class='dropdown-item btn_eliminar' data-id='" + objPersona.getId() + "' href='javascript:void(0) '>Eliminar</a>"
-                            + "<a class='dropdown-item btn_editar' data-id='" + objPersona.getId() + "' href='javascript:void(0) '>Actualizar</a>"
-                            + "</div>"
-                            + "</div>"
-                            + "</td>"
-                            + " </tr>";
-                    i++;
+                if (personaList != null) {
+                    for (Persona obj : personaList) {
+                        
+                        String nombre = (obj.getNombrePersona() != null) ? obj.getNombrePersona() : "---";
+                        String usuarioNom = (obj.getUsuario() != null) ? obj.getUsuario().getUsuario() : "Sin Asignar";
+                        String inicial = (nombre.length() > 0) ? nombre.substring(0, 1).toUpperCase() : "?";
+
+                        html += "  <tr>\n"
+                                + "      <td class='fw-bold text-center'>" + i + "</td>\n"
+                                + "      <td>\n"
+                                + "        <div class='d-flex align-items-center'>\n"
+                                + "           <div class='rounded-circle bg-purple-light text-purple d-flex justify-content-center align-items-center me-2' style='width:35px; height:35px; font-weight:bold;'>" + inicial + "</div>\n"
+                                + "           <div>" + nombre + "</div>\n"
+                                + "        </div>\n"
+                                + "      </td>\n"
+                                + "      <td><span class='badge bg-light text-dark border'>" + usuarioNom + "</span></td>\n"
+                                + "      <td>" + obj.getEdad() + " Años</td>\n"
+                                + "      <td>" + obj.getDui() + "</td>\n"
+                                + "      <td>" + obj.getTelefono() + "</td>\n"
+                                + "      <td class='text-center'>\n"
+                                + "        <div class='d-flex justify-content-center gap-2'>\n"
+                                + "          <button class='btn btn-sm btn-outline-purple btn_editar' data-id='" + obj.getId() + "' title='Editar'>\n"
+                                + "             <i class='bi bi-pencil-fill'></i>\n"
+                                + "          </button>\n"
+                                + "          <button class='btn btn-sm btn-outline-danger btn_eliminar' data-id='" + obj.getId() + "' title='Eliminar'>\n"
+                                + "             <i class='bi bi-trash-fill'></i>\n"
+                                + "          </button>\n"
+                                + "        </div>\n"
+                                + "      </td>\n"
+                                + "  </tr>";
+                        i++;
+                    }
                 }
-                html += "  </tbody>\n"
-                        + "</table>";
-                this.json.put("resultado", "exito");
-                this.json.put("tabla", html);
-                this.json.put("cantidad", cont);
-                this.array.put(this.json);
+
+                html += "  </tbody></table>";
+
+                json.put("resultado", "exito");
+                json.put("tabla", html);
+                json.put("cantidad", (personaList != null) ? personaList.size() : 0);
+                
+                array.put(json);
                 response.getWriter().write(array.toString());
             }
             break;
 
             case "editar_consultar": {
-                JSONObject personaJsonObject = new JSONObject();
-                PersonaJpaControler personaModel = new PersonaJpaControler(); //emf
-                
-                int idPersona = Integer.parseInt(request.getParameter("id"));
-                this.persona = new Persona(); // Es indispensable antes de setear sino da error
-                this.persona.setId(idPersona);
+                try {
+                    int id = Integer.parseInt(request.getParameter("id"));
+                    PersonaJpaControler personaModel = new PersonaJpaControler();
+                    Persona p = personaModel.findPersona(id);
+                    
+                    if (p != null) {
+                        JSONObject obj = new JSONObject();
+                        obj.put("idPersona", p.getId());
+                        obj.put("nombre", p.getNombrePersona());
+                        // Convertir fecha a String para input date
+                        obj.put("fechaNacimiento", p.getFechaNacimiento().toString()); 
+                        obj.put("dui", p.getDui());
+                        obj.put("telefono", p.getTelefono());
+                        obj.put("idUsuario", (p.getUsuario() != null) ? p.getUsuario().getId() : "");
 
-                this.personsRecuperada = new Persona();
-                this.personsRecuperada = personaModel.findPersona(idPersona);
-                if (this.personsRecuperada != null) {
-                    personaJsonObject.put("idPersona", this.personsRecuperada.getId());
-                    personaJsonObject.put("nombre", this.personsRecuperada.getNombrePersona());
-                  
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    String fechaFormateada = sdf.format(this.personsRecuperada.getFechaNacimiento());
-                    personaJsonObject.put("fechaNacimiento", fechaFormateada);
-                   
-                    personaJsonObject.put("dui", this.personsRecuperada.getDui());
-                    personaJsonObject.put("telefono", this.personsRecuperada.getTelefono());
-                    personaJsonObject.put("idUsuario", this.personsRecuperada.getUsuario().getId());
-
-                    this.json.put("resultado", "exito");
-                    this.json.put("persona", personaJsonObject);
-                } else {
-                    this.json.put("resultado", "error");
+                        json.put("resultado", "exito");
+                        json.put("persona", obj);
+                    } else {
+                        json.put("resultado", "error");
+                    }
+                } catch (Exception e) {
+                    json.put("resultado", "error");
                 }
-                this.array.put(this.json);
-                response.getWriter().write(this.array.toString());
+                array.put(json);
+                response.getWriter().write(array.toString());
             }
             break;
 
             case "eliminar": {
                 try {
-                    String resultado = "";
-                    PersonaJpaControler personaModel = null;
-                    personaModel = new PersonaJpaControler(); //emf
                     int idElim = Integer.parseInt(request.getParameter("id"));
-                    resultado = personaModel.destroy(idElim);
-                    if ("exito".equals(resultado)) {
-                        this.json.put("resultado", "exito");
-                    } else {
-                        this.json.put("resultado", "error_eliminar");
-                    }
-                } catch (NonexistentEntityException ex) {
-                    Logger.getLogger(PersonaServlet.class.getName()).log(Level.SEVERE, null, ex);
+                    PersonaJpaControler personaModel = new PersonaJpaControler();
+                    String resultado = personaModel.destroy(idElim);
+                    json.put("resultado", resultado.equals("exito") ? "exito" : "error");
+                } catch (Exception ex) {
+                    json.put("resultado", "error");
                 }
+                array.put(json);
+                response.getWriter().write(array.toString());
             }
-            this.array.put(this.json);
-            response.getWriter().write(this.array.toString());
             break;
         }
     }
-
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
 }

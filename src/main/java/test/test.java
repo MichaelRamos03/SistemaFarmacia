@@ -41,7 +41,7 @@ public class test {
         r1.setNombreRol("Administrador");
 
         Persona p1 = new Persona();
-        p1.setNombrePersona("Melba");
+        p1.setNombrePersona("Admin");
         p1.setFechaNacimiento(fecha1);
         p1.setEdad(25);
         p1.setDui(12345678);
@@ -51,9 +51,9 @@ public class test {
 
         Usuario usu1 = new Usuario();
   
-        usu1.setUsuario("ingMelba");
+        usu1.setUsuario("Admin");
         
-        String password = "123Ing";
+        String password = "123admin";
         String passwordIncriptada = Encriptar.getStringMessageDigest(password,Encriptar.SHA256);
         
         usu1.setContrasenia( passwordIncriptada);
